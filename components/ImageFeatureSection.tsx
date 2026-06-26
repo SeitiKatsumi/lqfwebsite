@@ -18,7 +18,7 @@ export function ImageFeatureSection({
   button?: { href: string; label: string };
 }) {
   return (
-    <section className="section-shell py-16 md:py-28">
+    <section className="section-shell py-12 md:py-28">
       <div className={`grid items-center gap-8 lg:grid-cols-2 ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
         <Reveal className="overflow-hidden rounded-[2rem] bg-mist shadow-soft">
           <div className="relative aspect-[4/5] md:aspect-[16/12]">
@@ -27,8 +27,8 @@ export function ImageFeatureSection({
         </Reveal>
         <Reveal className="px-1 md:px-8" delay={0.1}>
           {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-          <h2 className="mt-5 text-[clamp(2.2rem,5vw,5.4rem)] font-light leading-none text-graphite">{title}</h2>
-          <p className="body-large mt-7">{text}</p>
+          <h2 className="mt-4 text-[clamp(2rem,4.5vw,4.8rem)] font-light leading-[1.02] text-graphite">{title}</h2>
+          <p className="body-large mt-5 md:mt-7">{text}</p>
           {button && <div className="mt-8"><MinimalButton href={button.href} variant="ghost">{button.label}</MinimalButton></div>}
         </Reveal>
       </div>
