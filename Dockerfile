@@ -14,22 +14,8 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
-
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
-
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=nextjs:nodejs /app/next.config.mjs ./next.config.mjs
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
-
-USER nextjs
-EXPOSE 3000
-
-CMD ["pnpm", "start"]
+FROM nginx:1.27-alpine AS runner
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/out /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

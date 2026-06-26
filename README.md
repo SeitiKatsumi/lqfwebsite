@@ -25,7 +25,7 @@ pnpm build
 
 O projeto já inclui:
 
-- `Dockerfile` multi-stage com build Next e runtime `next start`.
+- `Dockerfile` multi-stage com export estático do Next e runtime Nginx.
 - `captain-definition` apontando para o Dockerfile.
 - `.dockerignore` para reduzir o contexto de build.
 - `pnpm-workspace.yaml` no contexto Docker para permitir os builds nativos exigidos por `sharp` e `unrs-resolver`.
@@ -35,7 +35,7 @@ No CapRover, crie o app e faça deploy pelo repositório `SeitiKatsumi/lqfwebsit
 Porta interna:
 
 ```text
-3000
+80
 ```
 
 Não há persistência local obrigatória neste site.
