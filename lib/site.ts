@@ -20,6 +20,7 @@ export const navItems = [
   { href: "/sobre", label: "Sobre" },
   { href: "/tecnologia", label: "Tecnologia" },
   { href: "/produtos", label: "Produtos" },
+  { href: "/#partners", label: "Partners" },
   { href: "/processo", label: "Processo LQF" },
   { href: "/private-label", label: "Private Label" },
   { href: "/contato", label: "Contato" }
