@@ -44,8 +44,12 @@ export function IrisAssistant() {
   const [error, setError] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  if (pathname?.startsWith("/admin")) {
-    return null;
+  function resetStoredLead(message = "Seu atendimento anterior nao esta mais disponivel. Informe seus dados para iniciar um novo atendimento.") {
+    window.localStorage.removeItem("lqf-iris-lead");
+    setIdentity(null);
+    setMessages([]);
+    setInput("");
+    setError(message);
   }
 
   useEffect(() => {
@@ -77,6 +81,16 @@ export function IrisAssistant() {
     async function syncMessages() {
       try {
         const response = await fetch(`/api/iris?leadId=${leadId}`);
+
+        if (response.status === 404) {
+          if (active) {
+            resetStoredLead();
+          }
+          return;
+        }
+
+        if (!response.ok) return;
+
         const data = (await response.json()) as { messages?: Array<{ id: string; role: "user" | "assistant"; content: string }> };
 
         if (active && data.messages?.length) {
@@ -140,7 +154,20 @@ export function IrisAssistant() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leadId: identity.leadId, message: trimmed })
       });
-      const data = (await response.json()) as { message?: string; error?: string; mode?: string };
+      const data = (await response.json().catch(() => ({}))) as { message?: string; error?: string; mode?: string };
+
+      if (response.status === 404) {
+        resetStoredLead();
+        return;
+      }
+
+      if (!response.ok) {
+        setMessages((current) => [
+          ...current,
+          createMessage("assistant", data.error || "Nao foi possivel registrar sua mensagem agora. Tente novamente em instantes.")
+        ]);
+        return;
+      }
 
       if (data.mode === "ai" && data.message) {
         setMessages((current) => [...current, createMessage("assistant", data.message as string)]);
@@ -168,6 +195,10 @@ export function IrisAssistant() {
       event.preventDefault();
       void sendMessage(input);
     }
+  }
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
   }
 
   return (
