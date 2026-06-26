@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import {
+  addLeadMessage,
   getLead,
+  getPublicChatSettings,
   getLeadMessages,
   isLeadStatus,
   leadStatusLabels,
   leadStatuses,
   listContactSubmissions,
   listLeads,
+  updateChatSettings,
+  updateLeadAiEnabled,
   updateLeadStatus
 } from "@/lib/leadStore";
 
@@ -38,7 +42,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ submissions: listContactSubmissions() });
   }
 
-  return NextResponse.json({ leads: listLeads(), statuses: leadStatuses, labels: leadStatusLabels });
+  if (searchParams.get("type") === "settings") {
+    return NextResponse.json({ settings: getPublicChatSettings() });
+  }
+
+  return NextResponse.json({ leads: listLeads(), statuses: leadStatuses, labels: leadStatusLabels, settings: getPublicChatSettings() });
 }
 
 export async function PATCH(request: Request) {
@@ -46,6 +54,43 @@ export async function PATCH(request: Request) {
 
   const body = await request.json().catch(() => null);
   const leadId = typeof body?.leadId === "string" ? body.leadId : "";
+  const action = typeof body?.action === "string" ? body.action : "status";
+
+  if (action === "settings") {
+    return NextResponse.json({
+      settings: updateChatSettings({
+        openaiApiKey: typeof body?.openaiApiKey === "string" ? body.openaiApiKey : undefined,
+        additionalPrompt: typeof body?.additionalPrompt === "string" ? body.additionalPrompt : undefined,
+        clearApiKey: Boolean(body?.clearApiKey)
+      })
+    });
+  }
+
+  if (action === "ai") {
+    if (!leadId || typeof body?.enabled !== "boolean") {
+      return NextResponse.json({ error: "Lead ou configuração de IA inválida." }, { status: 400 });
+    }
+
+    const lead = updateLeadAiEnabled(leadId, body.enabled);
+    if (!lead) return NextResponse.json({ error: "Lead nao encontrado." }, { status: 404 });
+
+    return NextResponse.json({ lead });
+  }
+
+  if (action === "message") {
+    const content = typeof body?.content === "string" ? body.content.trim() : "";
+
+    if (!leadId || !content) {
+      return NextResponse.json({ error: "Lead ou mensagem inválida." }, { status: 400 });
+    }
+
+    const lead = getLead(leadId);
+    if (!lead) return NextResponse.json({ error: "Lead nao encontrado." }, { status: 404 });
+
+    addLeadMessage({ leadId, role: "assistant", content });
+    return NextResponse.json({ lead: getLead(leadId), messages: getLeadMessages(leadId) });
+  }
+
   const status = body?.status;
 
   if (!leadId || !isLeadStatus(status)) {

@@ -69,18 +69,18 @@ export function PartnersSection() {
             text="A presença da LQF em diferentes projetos e parcerias reforça uma atuação baseada em consistência, responsabilidade produtiva e capacidade de transformar estratégia em produto acabado."
           />
         </div>
-        <Reveal className="rounded-[2rem] border border-graphite/10 bg-white p-3 md:p-5">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+        <Reveal className="rounded-[2rem] border border-graphite/10 bg-white p-4 md:p-6">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
             {partnerLogos.map((logo, index) => (
               <div
                 key={logo}
-                className="group grid h-28 place-items-center rounded-2xl border border-graphite/[0.06] bg-white p-5 transition hover:-translate-y-0.5 hover:border-graphite/14 hover:shadow-soft"
+                className="group grid h-36 place-items-center rounded-2xl border border-graphite/[0.06] bg-white p-6 transition hover:-translate-y-0.5 hover:border-graphite/14 hover:shadow-soft md:h-40"
               >
                 <img
                   src={`/partners/${logo}`}
                   alt={`Logo parceiro ${index + 1}`}
                   loading="lazy"
-                  className="max-h-14 max-w-full object-contain opacity-50 grayscale saturate-0 contrast-75 mix-blend-multiply transition duration-500 group-hover:opacity-100 group-hover:grayscale-0 group-hover:saturate-100 group-hover:contrast-100"
+                  className="max-h-20 max-w-[88%] object-contain opacity-55 grayscale saturate-0 contrast-75 mix-blend-multiply transition duration-500 group-hover:opacity-100 group-hover:grayscale-0 group-hover:saturate-100 group-hover:contrast-100 md:max-h-24"
                 />
               </div>
             ))}

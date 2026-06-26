@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { FileText, Loader2, Lock, MessageCircle, RefreshCw } from "lucide-react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Bot, FileText, KeyRound, Loader2, Lock, MessageCircle, RefreshCw, Send, Sparkles } from "lucide-react";
 
 type LeadStatus =
   | "em_atendimento_ia"
@@ -18,6 +18,7 @@ type Lead = {
   email: string;
   whatsapp: string;
   status: LeadStatus;
+  ai_enabled: number;
   summary: string | null;
   updated_at: string;
   message_count: number;
@@ -46,6 +47,11 @@ type ContactSubmission = {
   created_at: string;
 };
 
+type ChatSettings = {
+  hasApiKey: boolean;
+  additionalPrompt: string;
+};
+
 const statuses: LeadStatus[] = [
   "em_atendimento_ia",
   "solicitou_orcamento",
@@ -69,13 +75,18 @@ const labels: Record<LeadStatus, string> = {
 export function AdminPipeline() {
   const [adminKey, setAdminKey] = useState("");
   const [savedKey, setSavedKey] = useState("");
-  const [activeView, setActiveView] = useState<"iris" | "forms">("iris");
+  const [activeView, setActiveView] = useState<"iris" | "forms" | "settings">("iris");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
+  const [settings, setSettings] = useState<ChatSettings>({ hasApiKey: false, additionalPrompt: "" });
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [promptInput, setPromptInput] = useState("");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [messages, setMessages] = useState<LeadMessage[]>([]);
+  const [manualMessage, setManualMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -88,6 +99,10 @@ export function AdminPipeline() {
     if (savedKey) void loadAll(savedKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedKey]);
+
+  useEffect(() => {
+    setPromptInput(settings.additionalPrompt || "");
+  }, [settings.additionalPrompt]);
 
   const grouped = useMemo(
     () =>
@@ -104,12 +119,14 @@ export function AdminPipeline() {
     setError("");
 
     try {
-      const [leadResponse, contactResponse] = await Promise.all([
+      const [leadResponse, contactResponse, settingsResponse] = await Promise.all([
         fetch("/api/admin/leads", { headers: { "x-admin-key": key } }),
-        fetch("/api/admin/leads?type=contact", { headers: { "x-admin-key": key } })
+        fetch("/api/admin/leads?type=contact", { headers: { "x-admin-key": key } }),
+        fetch("/api/admin/leads?type=settings", { headers: { "x-admin-key": key } })
       ]);
-      const leadData = (await leadResponse.json()) as { leads?: Lead[]; error?: string };
-      const contactData = (await contactResponse.json()) as { submissions?: ContactSubmission[]; error?: string };
+      const leadData = (await leadResponse.json()) as { leads?: Lead[]; error?: string; settings?: ChatSettings };
+      const contactData = (await contactResponse.json()) as { submissions?: ContactSubmission[] };
+      const settingsData = (await settingsResponse.json()) as { settings?: ChatSettings };
 
       if (!leadResponse.ok) {
         setError(leadData.error || "Acesso não autorizado.");
@@ -118,6 +135,7 @@ export function AdminPipeline() {
 
       setLeads(leadData.leads || []);
       setSubmissions(contactData.submissions || []);
+      setSettings(settingsData.settings || leadData.settings || { hasApiKey: false, additionalPrompt: "" });
     } catch {
       setError("Não foi possível carregar o admin.");
     } finally {
@@ -129,9 +147,11 @@ export function AdminPipeline() {
     setSelectedLead(lead);
     setSelectedSubmission(null);
     setMessages([]);
+    setManualMessage("");
 
     const response = await fetch(`/api/admin/leads?leadId=${lead.id}`, { headers: { "x-admin-key": savedKey } });
-    const data = (await response.json()) as { messages?: LeadMessage[] };
+    const data = (await response.json()) as { lead?: Lead; messages?: LeadMessage[] };
+    if (data.lead) setSelectedLead(data.lead);
     setMessages(data.messages || []);
   }
 
@@ -143,6 +163,77 @@ export function AdminPipeline() {
     });
     await loadAll();
     setSelectedLead((current) => (current && current.id === leadId ? { ...current, status } : current));
+  }
+
+  async function updateLeadAi(enabled: boolean) {
+    if (!selectedLead) return;
+
+    const response = await fetch("/api/admin/leads", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      body: JSON.stringify({ action: "ai", leadId: selectedLead.id, enabled })
+    });
+    const data = (await response.json()) as { lead?: Lead };
+    if (data.lead) {
+      setSelectedLead(data.lead);
+      await loadAll();
+    }
+  }
+
+  async function sendManualMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedLead || !manualMessage.trim()) return;
+
+    const response = await fetch("/api/admin/leads", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      body: JSON.stringify({ action: "message", leadId: selectedLead.id, content: manualMessage })
+    });
+    const data = (await response.json()) as { messages?: LeadMessage[] };
+    setMessages(data.messages || messages);
+    setManualMessage("");
+    await loadAll();
+  }
+
+  async function saveSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/leads", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+        body: JSON.stringify({
+          action: "settings",
+          openaiApiKey: apiKeyInput,
+          additionalPrompt: promptInput
+        })
+      });
+      const data = (await response.json()) as { settings?: ChatSettings; error?: string };
+
+      if (!response.ok) {
+        setError(data.error || "Não foi possível salvar as configurações.");
+        return;
+      }
+
+      setSettings(data.settings || settings);
+      setApiKeyInput("");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function clearApiKey() {
+    setSaving(true);
+    const response = await fetch("/api/admin/leads", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      body: JSON.stringify({ action: "settings", clearApiKey: true, additionalPrompt: promptInput })
+    });
+    const data = (await response.json()) as { settings?: ChatSettings };
+    setSettings(data.settings || { hasApiKey: false, additionalPrompt: promptInput });
+    setSaving(false);
   }
 
   function unlock() {
@@ -158,7 +249,7 @@ export function AdminPipeline() {
             <Lock className="h-5 w-5" />
           </div>
           <h1 className="mt-6 text-3xl font-light text-graphite">Admin LQF</h1>
-          <p className="mt-3 text-sm leading-6 text-graphite/66">Informe a chave configurada em ADMIN_PASSWORD para acessar o pipeline e os formulários.</p>
+          <p className="mt-3 text-sm leading-6 text-graphite/66">Informe a chave configurada em ADMIN_PASSWORD para acessar o atendimento.</p>
           <input
             value={adminKey}
             onChange={(event) => setAdminKey(event.target.value)}
@@ -191,29 +282,20 @@ export function AdminPipeline() {
           </button>
         </div>
         <div className="mt-7 flex flex-wrap gap-2">
-          <button
-            onClick={() => setActiveView("iris")}
-            className={`flex h-11 items-center gap-2 rounded-full px-5 text-sm transition ${
-              activeView === "iris" ? "bg-graphite text-white" : "border border-graphite/10 text-graphite/70 hover:bg-porcelain"
-            }`}
-          >
-            <MessageCircle className="h-4 w-4" />
+          <TabButton active={activeView === "iris"} onClick={() => setActiveView("iris")} icon={<MessageCircle className="h-4 w-4" />}>
             Pipeline Iris
-          </button>
-          <button
-            onClick={() => setActiveView("forms")}
-            className={`flex h-11 items-center gap-2 rounded-full px-5 text-sm transition ${
-              activeView === "forms" ? "bg-graphite text-white" : "border border-graphite/10 text-graphite/70 hover:bg-porcelain"
-            }`}
-          >
-            <FileText className="h-4 w-4" />
+          </TabButton>
+          <TabButton active={activeView === "forms"} onClick={() => setActiveView("forms")} icon={<FileText className="h-4 w-4" />}>
             Formulários ({submissions.length})
-          </button>
+          </TabButton>
+          <TabButton active={activeView === "settings"} onClick={() => setActiveView("settings")} icon={<KeyRound className="h-4 w-4" />}>
+            Configurações Iris
+          </TabButton>
         </div>
         {error && <p className="mt-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
       </section>
 
-      {activeView === "iris" ? (
+      {activeView === "iris" && (
         <section className="overflow-x-auto px-5 pb-10 sm:px-8 lg:px-12">
           <div className="grid min-w-[1320px] grid-cols-7 gap-3">
             {grouped.map((column) => (
@@ -229,7 +311,12 @@ export function AdminPipeline() {
                       onClick={() => openLead(lead)}
                       className="rounded-[20px] border border-graphite/8 bg-white p-4 text-left shadow-[0_12px_34px_rgba(63,63,59,0.05)] transition hover:-translate-y-0.5 hover:shadow-soft"
                     >
-                      <p className="text-sm font-medium text-graphite">{lead.name}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-medium text-graphite">{lead.name}</p>
+                        <span className={`rounded-full px-2 py-1 text-[0.65rem] ${lead.ai_enabled ? "bg-emerald-50 text-emerald-700" : "bg-stone/12 text-graphite/55"}`}>
+                          {lead.ai_enabled ? "IA" : "Humano"}
+                        </span>
+                      </div>
                       <p className="mt-1 truncate text-xs text-graphite/55">{lead.whatsapp}</p>
                       <p className="mt-3 line-clamp-3 text-xs leading-5 text-graphite/62">{lead.last_message || "Sem mensagem recente"}</p>
                       <p className="mt-3 text-[0.68rem] uppercase text-ash">{lead.message_count} mensagens</p>
@@ -240,7 +327,9 @@ export function AdminPipeline() {
             ))}
           </div>
         </section>
-      ) : (
+      )}
+
+      {activeView === "forms" && (
         <section className="section-shell grid gap-4 pb-12 md:grid-cols-2 xl:grid-cols-3">
           {submissions.map((submission) => (
             <button
@@ -260,8 +349,59 @@ export function AdminPipeline() {
         </section>
       )}
 
+      {activeView === "settings" && (
+        <section className="section-shell max-w-4xl pb-12">
+          <form onSubmit={saveSettings} className="rounded-[28px] border border-graphite/10 bg-porcelain/60 p-6 md:p-8">
+            <div className="flex items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center rounded-full bg-white text-graphite">
+                <Bot className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-light text-graphite">Agente Iris</h2>
+                <p className="text-sm text-graphite/60">A Iris usa o conteúdo do site como contexto e este prompt adicional como orientação.</p>
+              </div>
+            </div>
+            <div className="mt-8 grid gap-5">
+              <label className="grid gap-2 text-sm text-graphite/70">
+                OpenAI API Key
+                <input
+                  value={apiKeyInput}
+                  onChange={(event) => setApiKeyInput(event.target.value)}
+                  type="password"
+                  placeholder={settings.hasApiKey ? "Chave configurada. Digite uma nova para substituir." : "sk-..."}
+                  className="h-12 rounded-2xl border border-graphite/10 bg-white px-4 text-sm outline-none focus:border-stone"
+                />
+              </label>
+              <label className="grid gap-2 text-sm text-graphite/70">
+                Prompt adicional
+                <textarea
+                  value={promptInput}
+                  onChange={(event) => setPromptInput(event.target.value)}
+                  placeholder="Ex.: priorize atendimento para marcas que buscam private label; peça categoria, volume e etapa atual do projeto."
+                  className="min-h-44 rounded-2xl border border-graphite/10 bg-white px-4 py-3 text-sm leading-6 outline-none focus:border-stone"
+                />
+              </label>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button type="submit" disabled={saving} className="flex h-12 items-center gap-2 rounded-full bg-graphite px-6 text-sm font-medium text-white disabled:opacity-55">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                Salvar agente
+              </button>
+              {settings.hasApiKey && (
+                <button type="button" onClick={clearApiKey} className="h-12 rounded-full border border-graphite/10 px-6 text-sm text-graphite/70">
+                  Remover chave
+                </button>
+              )}
+            </div>
+            <p className="mt-5 text-sm text-graphite/58">
+              Status da chave: {settings.hasApiKey ? "configurada" : "não configurada"}. Sem chave, a Iris registra a conversa e aguarda resposta humana.
+            </p>
+          </form>
+        </section>
+      )}
+
       {selectedLead && (
-        <aside className="fixed inset-y-0 right-0 z-[90] flex w-full max-w-[520px] flex-col border-l border-graphite/10 bg-white shadow-[0_0_80px_rgba(63,63,59,0.16)]">
+        <aside className="fixed inset-y-0 right-0 z-[90] flex w-full max-w-[560px] flex-col border-l border-graphite/10 bg-white shadow-[0_0_80px_rgba(63,63,59,0.16)]">
           <div className="border-b border-graphite/10 p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -277,17 +417,27 @@ export function AdminPipeline() {
                 Fechar
               </button>
             </div>
-            <select
-              value={selectedLead.status}
-              onChange={(event) => updateStatus(selectedLead.id, event.target.value as LeadStatus)}
-              className="mt-5 h-12 w-full rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none"
-            >
-              {statuses.map((status) => (
-                <option key={status} value={status}>
-                  {labels[status]}
-                </option>
-              ))}
-            </select>
+            <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]">
+              <select
+                value={selectedLead.status}
+                onChange={(event) => updateStatus(selectedLead.id, event.target.value as LeadStatus)}
+                className="h-12 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none"
+              >
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {labels[status]}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => updateLeadAi(!selectedLead.ai_enabled)}
+                className={`h-12 rounded-full px-5 text-sm font-medium ${
+                  selectedLead.ai_enabled ? "bg-graphite text-white" : "border border-graphite/10 text-graphite/70"
+                }`}
+              >
+                {selectedLead.ai_enabled ? "IA ligada" : "Assumido por humano"}
+              </button>
+            </div>
           </div>
           <div className="flex-1 space-y-4 overflow-y-auto bg-porcelain/54 p-5">
             {messages.map((message) => (
@@ -298,6 +448,21 @@ export function AdminPipeline() {
               </div>
             ))}
           </div>
+          <form onSubmit={sendManualMessage} className="border-t border-graphite/10 bg-white p-4">
+            <label className="grid gap-2 text-sm text-graphite/70">
+              Responder como equipe LQF
+              <textarea
+                value={manualMessage}
+                onChange={(event) => setManualMessage(event.target.value)}
+                placeholder="Digite uma resposta manual para aparecer no chat do visitante."
+                className="min-h-24 rounded-2xl border border-graphite/10 bg-porcelain px-4 py-3 text-sm outline-none focus:border-stone"
+              />
+            </label>
+            <button type="submit" className="mt-3 flex h-11 items-center gap-2 rounded-full bg-graphite px-5 text-sm font-medium text-white">
+              <Send className="h-4 w-4" />
+              Enviar resposta
+            </button>
+          </form>
         </aside>
       )}
 
@@ -326,6 +491,20 @@ export function AdminPipeline() {
         </aside>
       )}
     </main>
+  );
+}
+
+function TabButton({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex h-11 items-center gap-2 rounded-full px-5 text-sm transition ${
+        active ? "bg-graphite text-white" : "border border-graphite/10 text-graphite/70 hover:bg-porcelain"
+      }`}
+    >
+      {icon}
+      {children}
+    </button>
   );
 }
 

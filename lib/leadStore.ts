@@ -31,6 +31,7 @@ export type Lead = {
   email: string;
   whatsapp: string;
   status: LeadStatus;
+  ai_enabled: number;
   summary: string | null;
   created_at: string;
   updated_at: string;
@@ -63,6 +64,11 @@ export type ContactSubmission = {
   estimated_volume: string | null;
   message: string | null;
   created_at: string;
+};
+
+export type ChatSettings = {
+  openai_api_key: string;
+  additional_prompt: string;
 };
 
 let database: DatabaseSync | null = null;
@@ -131,7 +137,17 @@ function getDb() {
 
     CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at
       ON contact_submissions(created_at);
+
+    CREATE TABLE IF NOT EXISTS chat_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
   `);
+
+  const leadColumns = database.prepare("PRAGMA table_info(leads)").all() as Array<{ name: string }>;
+  if (!leadColumns.some((column) => column.name === "ai_enabled")) {
+    database.exec("ALTER TABLE leads ADD COLUMN ai_enabled INTEGER NOT NULL DEFAULT 1");
+  }
 
   return database;
 }
@@ -159,6 +175,11 @@ export function getLead(id: string) {
 
 export function updateLeadStatus(id: string, status: LeadStatus) {
   getDb().prepare("UPDATE leads SET status = ?, updated_at = ? WHERE id = ?").run(status, now(), id);
+  return getLead(id);
+}
+
+export function updateLeadAiEnabled(id: string, enabled: boolean) {
+  getDb().prepare("UPDATE leads SET ai_enabled = ?, updated_at = ? WHERE id = ?").run(enabled ? 1 : 0, now(), id);
   return getLead(id);
 }
 
@@ -277,4 +298,49 @@ export function listContactSubmissions() {
   return getDb()
     .prepare("SELECT * FROM contact_submissions ORDER BY created_at DESC")
     .all() as ContactSubmission[];
+}
+
+export function getSetting(key: keyof ChatSettings) {
+  const row = getDb().prepare("SELECT value FROM chat_settings WHERE key = ?").get(key) as { value: string } | undefined;
+  return row?.value ?? "";
+}
+
+export function setSetting(key: keyof ChatSettings, value: string) {
+  getDb()
+    .prepare(
+      `
+      INSERT INTO chat_settings (key, value) VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+      `
+    )
+    .run(key, value);
+}
+
+export function getChatSettings(): ChatSettings {
+  return {
+    openai_api_key: getSetting("openai_api_key"),
+    additional_prompt: getSetting("additional_prompt")
+  };
+}
+
+export function getPublicChatSettings() {
+  const settings = getChatSettings();
+  return {
+    hasApiKey: Boolean(settings.openai_api_key || process.env.OPENAI_API_KEY),
+    additionalPrompt: settings.additional_prompt
+  };
+}
+
+export function updateChatSettings(input: { openaiApiKey?: string; additionalPrompt?: string; clearApiKey?: boolean }) {
+  if (input.clearApiKey) {
+    setSetting("openai_api_key", "");
+  } else if (typeof input.openaiApiKey === "string" && input.openaiApiKey.trim()) {
+    setSetting("openai_api_key", input.openaiApiKey.trim());
+  }
+
+  if (typeof input.additionalPrompt === "string") {
+    setSetting("additional_prompt", input.additionalPrompt.trim());
+  }
+
+  return getPublicChatSettings();
 }

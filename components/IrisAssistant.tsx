@@ -68,6 +68,34 @@ export function IrisAssistant() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!identity || !open) return;
+
+    let active = true;
+    const leadId = identity.leadId;
+
+    async function syncMessages() {
+      try {
+        const response = await fetch(`/api/iris?leadId=${leadId}`);
+        const data = (await response.json()) as { messages?: Array<{ id: string; role: "user" | "assistant"; content: string }> };
+
+        if (active && data.messages?.length) {
+          setMessages(data.messages.map((message) => ({ id: message.id, role: message.role, content: message.content })));
+        }
+      } catch {
+        // Keeps the local optimistic chat intact if polling fails.
+      }
+    }
+
+    void syncMessages();
+    const interval = window.setInterval(syncMessages, 4500);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [identity, open]);
+
   async function startLead(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -112,12 +140,13 @@ export function IrisAssistant() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leadId: identity.leadId, message: trimmed })
       });
-      const data = (await response.json()) as { message?: string; error?: string };
+      const data = (await response.json()) as { message?: string; error?: string; mode?: string };
 
-      setMessages((current) => [
-        ...current,
-        createMessage("assistant", data.message || data.error || "Me conte um pouco mais sobre o projeto para eu orientar melhor.")
-      ]);
+      if (data.mode === "ai" && data.message) {
+        setMessages((current) => [...current, createMessage("assistant", data.message as string)]);
+      } else if (data.message || data.error) {
+        setMessages((current) => [...current, createMessage("assistant", data.message || data.error || "Mensagem registrada.")]);
+      }
     } catch {
       setMessages((current) => [
         ...current,

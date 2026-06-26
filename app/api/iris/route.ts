@@ -4,10 +4,11 @@ import {
   classifyLeadStatus,
   getLead,
   getLeadMessages,
+  getChatSettings,
   updateLeadStatus,
   updateLeadSummary
 } from "@/lib/leadStore";
-import { buildFallbackReply, buildLeadContext, IRIS_SYSTEM_PROMPT } from "@/lib/irisKnowledge";
+import { buildIrisSystemPrompt, buildLeadContext, buildWaitingForHumanMessage } from "@/lib/irisKnowledge";
 
 export const runtime = "nodejs";
 
@@ -40,6 +41,26 @@ function readOutputText(data: unknown) {
   );
 }
 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const leadId = clean(searchParams.get("leadId"));
+
+  if (!leadId) {
+    return NextResponse.json({ error: "Atendimento nao encontrado." }, { status: 400 });
+  }
+
+  const lead = getLead(leadId);
+  if (!lead) {
+    return NextResponse.json({ error: "Atendimento nao encontrado." }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    lead,
+    messages: getLeadMessages(leadId),
+    aiEnabled: Boolean(lead.ai_enabled)
+  });
+}
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const leadId = clean(body && typeof body === "object" ? (body as { leadId?: unknown }).leadId : "");
@@ -62,11 +83,14 @@ export async function POST(request: Request) {
   const messages = getLeadMessages(leadId);
   updateLeadSummary(leadId, userMessage);
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const settings = getChatSettings();
+  const apiKey = settings.openai_api_key || process.env.OPENAI_API_KEY;
   let assistantMessage = "";
-  let mode: "ai" | "fallback" = "fallback";
+  let mode: "ai" | "waiting_human" | "disabled" | "error" = "waiting_human";
 
-  if (apiKey) {
+  if (!updatedLead.ai_enabled) {
+    mode = "disabled";
+  } else if (apiKey) {
     try {
       const response = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
@@ -77,7 +101,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
           input: [
-            { role: "system", content: IRIS_SYSTEM_PROMPT },
+            { role: "system", content: buildIrisSystemPrompt(settings.additional_prompt) },
             { role: "system", content: buildLeadContext(updatedLead) },
             ...messages.slice(-14).map((message) => ({
               role: message.role,
@@ -91,18 +115,22 @@ export async function POST(request: Request) {
 
       if (response.ok) {
         assistantMessage = readOutputText(await response.json());
-        mode = assistantMessage ? "ai" : "fallback";
+        mode = assistantMessage ? "ai" : "error";
+      } else {
+        mode = "error";
       }
     } catch {
-      mode = "fallback";
+      mode = "error";
     }
   }
 
   if (!assistantMessage) {
-    assistantMessage = buildFallbackReply(updatedLead, messages);
+    assistantMessage = buildWaitingForHumanMessage();
   }
 
-  addLeadMessage({ leadId, role: "assistant", content: assistantMessage });
+  if (mode !== "disabled" && mode !== "waiting_human") {
+    addLeadMessage({ leadId, role: "assistant", content: assistantMessage });
+  }
 
   return NextResponse.json({
     message: assistantMessage,
