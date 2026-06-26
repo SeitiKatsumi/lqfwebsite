@@ -9,6 +9,7 @@ type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  sender_name?: string | null;
 };
 
 type LeadIdentity = {
@@ -44,7 +45,7 @@ export function IrisAssistant() {
   const [error, setError] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  function resetStoredLead(message = "Seu atendimento anterior nao esta mais disponivel. Informe seus dados para iniciar um novo atendimento.") {
+  function resetStoredLead(message = "Seu atendimento anterior não está mais disponível. Informe seus dados para iniciar um novo atendimento.") {
     window.localStorage.removeItem("lqf-iris-lead");
     setIdentity(null);
     setMessages([]);
@@ -91,10 +92,12 @@ export function IrisAssistant() {
 
         if (!response.ok) return;
 
-        const data = (await response.json()) as { messages?: Array<{ id: string; role: "user" | "assistant"; content: string }> };
+        const data = (await response.json()) as { messages?: Array<{ id: string; role: "user" | "assistant"; content: string; sender_name?: string | null }> };
 
         if (active && data.messages?.length) {
-          setMessages(data.messages.map((message) => ({ id: message.id, role: message.role, content: message.content })));
+          setMessages(
+            data.messages.map((message) => ({ id: message.id, role: message.role, content: message.content, sender_name: message.sender_name }))
+          );
         }
       } catch {
         // Keeps the local optimistic chat intact if polling fails.
@@ -124,7 +127,7 @@ export function IrisAssistant() {
       const data = (await response.json()) as { lead?: { id: string; name: string }; message?: string; error?: string };
 
       if (!response.ok || !data.lead) {
-        setError(data.error || "Nao foi possivel iniciar o atendimento.");
+        setError(data.error || "Não foi possível iniciar o atendimento.");
         return;
       }
 
@@ -134,7 +137,7 @@ export function IrisAssistant() {
       setMessages([createMessage("assistant", data.message || "Contato registrado. Como posso ajudar?")]);
       setTimeout(() => textareaRef.current?.focus(), 80);
     } catch {
-      setError("Nao foi possivel conectar a Iris agora.");
+      setError("Não foi possível conectar a Iris agora.");
     } finally {
       setLoading(false);
     }
@@ -164,7 +167,7 @@ export function IrisAssistant() {
       if (!response.ok) {
         setMessages((current) => [
           ...current,
-          createMessage("assistant", data.error || "Nao foi possivel registrar sua mensagem agora. Tente novamente em instantes.")
+          createMessage("assistant", data.error || "Não foi possível registrar sua mensagem agora. Tente novamente em instantes.")
         ]);
         return;
       }
@@ -177,7 +180,7 @@ export function IrisAssistant() {
     } catch {
       setMessages((current) => [
         ...current,
-        createMessage("assistant", "Tive uma instabilidade agora. Seu contato ja foi registrado para continuidade do atendimento.")
+        createMessage("assistant", "Tive uma instabilidade agora. Seu contato já foi registrado para continuidade do atendimento.")
       ]);
     } finally {
       setLoading(false);
@@ -296,6 +299,9 @@ export function IrisAssistant() {
                             : "border border-graphite/8 bg-white text-graphite/82 shadow-[0_10px_34px_rgba(63,63,59,0.06)]"
                         }`}
                       >
+                        {message.role === "assistant" && message.sender_name && (
+                          <p className="mb-1 text-[0.68rem] font-medium uppercase tracking-[0.12em] text-graphite/42">{message.sender_name}</p>
+                        )}
                         {message.content}
                       </div>
                     </div>
@@ -304,7 +310,7 @@ export function IrisAssistant() {
                     <div className="flex justify-start">
                       <div className="flex items-center gap-2 rounded-full border border-graphite/8 bg-white px-4 py-3 text-sm text-graphite/62">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Iris esta analisando
+                        Iris está analisando
                       </div>
                     </div>
                   )}

@@ -28,10 +28,10 @@ export async function POST(request: Request) {
   const lead = createLead({ name, email, whatsapp });
 
   if (!lead) {
-    return NextResponse.json({ error: "Nao foi possivel iniciar o atendimento." }, { status: 500 });
+    return NextResponse.json({ error: "Não foi possível iniciar o atendimento." }, { status: 500 });
   }
 
-  const message = `Perfeito, ${lead.name}. Ja registrei seu contato. Agora me conte: voce quer desenvolver uma linha, pedir orcamento, agendar visita ou tirar uma duvida tecnica?`;
+  const message = `Perfeito, ${lead.name}. Já registrei seu contato. Agora me conte: você quer desenvolver uma linha, pedir orçamento, agendar visita ou tirar uma dúvida técnica?`;
   addLeadMessage({ leadId: lead.id, role: "assistant", content: message });
 
   return NextResponse.json({ lead, message });

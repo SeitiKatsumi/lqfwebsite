@@ -41,20 +41,26 @@ function readOutputText(data: unknown) {
   );
 }
 
+function irisJson(data: unknown, init?: ResponseInit) {
+  const response = NextResponse.json(data, init);
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  return response;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const leadId = clean(searchParams.get("leadId"));
 
   if (!leadId) {
-    return NextResponse.json({ error: "Atendimento nao encontrado." }, { status: 400 });
+    return irisJson({ error: "Atendimento não encontrado." }, { status: 400 });
   }
 
   const lead = getLead(leadId);
   if (!lead) {
-    return NextResponse.json({ error: "Atendimento nao encontrado." }, { status: 404 });
+    return irisJson({ error: "Atendimento não encontrado." }, { status: 404 });
   }
 
-  return NextResponse.json({
+  return irisJson({
     lead,
     messages: getLeadMessages(leadId),
     aiEnabled: Boolean(lead.ai_enabled)
@@ -67,12 +73,12 @@ export async function POST(request: Request) {
   const userMessage = clean(body && typeof body === "object" ? (body as { message?: unknown }).message : "");
 
   if (!leadId || !userMessage) {
-    return NextResponse.json({ error: "Atendimento nao encontrado ou mensagem vazia." }, { status: 400 });
+    return irisJson({ error: "Atendimento não encontrado ou mensagem vazia." }, { status: 400 });
   }
 
   const lead = getLead(leadId);
   if (!lead) {
-    return NextResponse.json({ error: "Atendimento nao encontrado." }, { status: 404 });
+    return irisJson({ error: "Atendimento não encontrado." }, { status: 404 });
   }
 
   addLeadMessage({ leadId, role: "user", content: userMessage });
@@ -132,7 +138,7 @@ export async function POST(request: Request) {
     addLeadMessage({ leadId, role: "assistant", content: assistantMessage });
   }
 
-  return NextResponse.json({
+  return irisJson({
     message: assistantMessage,
     mode,
     status: updatedLead.status

@@ -48,6 +48,7 @@ export type LeadMessage = {
   lead_id: string;
   role: "user" | "assistant";
   content: string;
+  sender_name: string | null;
   created_at: string;
 };
 
@@ -78,7 +79,15 @@ function now() {
 }
 
 function databasePath() {
-  return process.env.SQLITE_PATH || path.join(process.cwd(), "data", "lqf-leads.sqlite");
+  if (process.env.SQLITE_PATH?.trim()) {
+    return process.env.SQLITE_PATH.trim();
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    return "/data/lqf-leads.sqlite";
+  }
+
+  return path.join(process.cwd(), "data", "lqf-leads.sqlite");
 }
 
 function normalizeText(value: string) {
@@ -111,6 +120,7 @@ function getDb() {
       lead_id TEXT NOT NULL,
       role TEXT NOT NULL,
       content TEXT NOT NULL,
+      sender_name TEXT,
       created_at TEXT NOT NULL,
       FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
     );
@@ -149,6 +159,11 @@ function getDb() {
     database.exec("ALTER TABLE leads ADD COLUMN ai_enabled INTEGER NOT NULL DEFAULT 1");
   }
 
+  const messageColumns = database.prepare("PRAGMA table_info(lead_messages)").all() as Array<{ name: string }>;
+  if (!messageColumns.some((column) => column.name === "sender_name")) {
+    database.exec("ALTER TABLE lead_messages ADD COLUMN sender_name TEXT");
+  }
+
   return database;
 }
 
@@ -178,6 +193,23 @@ export function updateLeadStatus(id: string, status: LeadStatus) {
   return getLead(id);
 }
 
+export function updateLeadDetails(id: string, input: { name: string; email: string; whatsapp: string }) {
+  getDb()
+    .prepare("UPDATE leads SET name = ?, email = ?, whatsapp = ?, updated_at = ? WHERE id = ?")
+    .run(input.name, input.email, input.whatsapp, now(), id);
+  return getLead(id);
+}
+
+export function deleteLead(id: string) {
+  const db = getDb();
+  const lead = getLead(id);
+  if (!lead) return false;
+
+  db.prepare("DELETE FROM lead_messages WHERE lead_id = ?").run(id);
+  db.prepare("DELETE FROM leads WHERE id = ?").run(id);
+  return true;
+}
+
 export function updateLeadAiEnabled(id: string, enabled: boolean) {
   getDb().prepare("UPDATE leads SET ai_enabled = ?, updated_at = ? WHERE id = ?").run(enabled ? 1 : 0, now(), id);
   return getLead(id);
@@ -187,15 +219,16 @@ export function updateLeadSummary(id: string, summary: string) {
   getDb().prepare("UPDATE leads SET summary = ?, updated_at = ? WHERE id = ?").run(summary.slice(0, 500), now(), id);
 }
 
-export function addLeadMessage(input: { leadId: string; role: LeadMessage["role"]; content: string }) {
+export function addLeadMessage(input: { leadId: string; role: LeadMessage["role"]; content: string; senderName?: string }) {
   const db = getDb();
   const createdAt = now();
 
-  db.prepare("INSERT INTO lead_messages (id, lead_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)").run(
+  db.prepare("INSERT INTO lead_messages (id, lead_id, role, content, sender_name, created_at) VALUES (?, ?, ?, ?, ?, ?)").run(
     randomUUID(),
     input.leadId,
     input.role,
     input.content,
+    input.senderName?.trim() || null,
     createdAt
   );
   db.prepare("UPDATE leads SET updated_at = ? WHERE id = ?").run(createdAt, input.leadId);
@@ -325,9 +358,12 @@ export function getChatSettings(): ChatSettings {
 
 export function getPublicChatSettings() {
   const settings = getChatSettings();
+  const apiKey = settings.openai_api_key || process.env.OPENAI_API_KEY || "";
   return {
-    hasApiKey: Boolean(settings.openai_api_key || process.env.OPENAI_API_KEY),
-    additionalPrompt: settings.additional_prompt
+    hasApiKey: Boolean(apiKey),
+    apiKeyLast4: apiKey ? apiKey.slice(-4) : "",
+    additionalPrompt: settings.additional_prompt,
+    storagePath: databasePath()
   };
 }
 

@@ -45,9 +45,14 @@ A assistente Iris registra leads, pipeline e histórico de conversa em SQLite. C
 ```text
 OPENAI_API_KEY=...
 ADMIN_PASSWORD=...
-SQLITE_PATH=/app/data/lqf-leads.sqlite
+SQLITE_PATH=/data/lqf-leads.sqlite
 ```
 
-`OPENAI_MODEL` é opcional. Sem `OPENAI_API_KEY`, a Iris responde com uma base local simples. O painel de gestão fica em `/admin` e exige a chave `ADMIN_PASSWORD`.
+`OPENAI_MODEL` é opcional. Sem uma chave OpenAI configurada no painel ou em `OPENAI_API_KEY`, a Iris registra a conversa e aguarda resposta humana. O painel de gestão fica em `/admin` e exige a chave `ADMIN_PASSWORD`.
 
-Para preservar os dados em produção, configure volume persistente no CapRover apontando para `/app/data`.
+Para preservar chave da Iris, leads, formulários e histórico de conversa em produção, configure um diretório persistente no CapRover:
+
+```text
+Caminho no App: /data
+Rótulo: lqfwebsite-data
+```

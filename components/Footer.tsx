@@ -67,9 +67,14 @@ export function Footer() {
       <div className="section-shell border-t border-graphite/10 py-6 text-xs text-graphite/45">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span>© {new Date().getFullYear()} LQF Farmacêutica. Todos os direitos reservados.</span>
-          <Link href="/politica-de-privacidade" className="transition hover:text-graphite">
-            Política de Privacidade
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <a href="https://elevenmind.com.br/" target="_blank" rel="noreferrer" className="transition hover:text-graphite">
+              Desenvolvido por Elevenmind
+            </a>
+            <Link href="/politica-de-privacidade" className="transition hover:text-graphite">
+              Política de Privacidade
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

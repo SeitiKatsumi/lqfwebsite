@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Bot, FileText, KeyRound, Loader2, Lock, MessageCircle, RefreshCw, Send, Sparkles } from "lucide-react";
+import { Bot, FileText, KeyRound, Loader2, Lock, MessageCircle, Pencil, RefreshCw, Send, Sparkles, Trash2 } from "lucide-react";
 
 type LeadStatus =
   | "em_atendimento_ia"
@@ -29,6 +29,7 @@ type LeadMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  sender_name: string | null;
   created_at: string;
 };
 
@@ -49,7 +50,9 @@ type ContactSubmission = {
 
 type ChatSettings = {
   hasApiKey: boolean;
+  apiKeyLast4?: string;
   additionalPrompt: string;
+  storagePath?: string;
 };
 
 const statuses: LeadStatus[] = [
@@ -85,14 +88,19 @@ export function AdminPipeline() {
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [messages, setMessages] = useState<LeadMessage[]>([]);
   const [manualMessage, setManualMessage] = useState("");
+  const [attendantName, setAttendantName] = useState("");
+  const [editingLead, setEditingLead] = useState(false);
+  const [leadDraft, setLeadDraft] = useState({ name: "", email: "", whatsapp: "" });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const stored = window.localStorage.getItem("lqf-admin-key") || "";
+    const storedAttendant = window.localStorage.getItem("lqf-attendant-name") || "";
     setSavedKey(stored);
     setAdminKey(stored);
+    setAttendantName(storedAttendant);
   }, []);
 
   useEffect(() => {
@@ -120,9 +128,9 @@ export function AdminPipeline() {
 
     try {
       const [leadResponse, contactResponse, settingsResponse] = await Promise.all([
-        fetch("/api/admin/leads", { headers: { "x-admin-key": key } }),
-        fetch("/api/admin/leads?type=contact", { headers: { "x-admin-key": key } }),
-        fetch("/api/admin/leads?type=settings", { headers: { "x-admin-key": key } })
+        fetch("/api/admin/leads", { headers: { "x-admin-key": key }, cache: "no-store" }),
+        fetch("/api/admin/leads?type=contact", { headers: { "x-admin-key": key }, cache: "no-store" }),
+        fetch("/api/admin/leads?type=settings", { headers: { "x-admin-key": key }, cache: "no-store" })
       ]);
       const leadData = (await leadResponse.json()) as { leads?: Lead[]; error?: string; settings?: ChatSettings };
       const contactData = (await contactResponse.json()) as { submissions?: ContactSubmission[] };
@@ -148,10 +156,15 @@ export function AdminPipeline() {
     setSelectedSubmission(null);
     setMessages([]);
     setManualMessage("");
+    setEditingLead(false);
+    setLeadDraft({ name: lead.name, email: lead.email, whatsapp: lead.whatsapp });
 
-    const response = await fetch(`/api/admin/leads?leadId=${lead.id}`, { headers: { "x-admin-key": savedKey } });
+    const response = await fetch(`/api/admin/leads?leadId=${lead.id}`, { headers: { "x-admin-key": savedKey }, cache: "no-store" });
     const data = (await response.json()) as { lead?: Lead; messages?: LeadMessage[] };
-    if (data.lead) setSelectedLead(data.lead);
+    if (data.lead) {
+      setSelectedLead(data.lead);
+      setLeadDraft({ name: data.lead.name, email: data.lead.email, whatsapp: data.lead.whatsapp });
+    }
     setMessages(data.messages || []);
   }
 
@@ -184,14 +197,58 @@ export function AdminPipeline() {
     event.preventDefault();
     if (!selectedLead || !manualMessage.trim()) return;
 
+    window.localStorage.setItem("lqf-attendant-name", attendantName.trim());
     const response = await fetch("/api/admin/leads", {
       method: "PATCH",
       headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
-      body: JSON.stringify({ action: "message", leadId: selectedLead.id, content: manualMessage })
+      body: JSON.stringify({ action: "message", leadId: selectedLead.id, content: manualMessage, senderName: attendantName })
     });
     const data = (await response.json()) as { messages?: LeadMessage[] };
     setMessages(data.messages || messages);
     setManualMessage("");
+    await loadAll();
+  }
+
+  async function saveLeadDetails(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedLead) return;
+
+    const response = await fetch("/api/admin/leads", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      body: JSON.stringify({ action: "edit", leadId: selectedLead.id, ...leadDraft })
+    });
+    const data = (await response.json()) as { lead?: Lead; messages?: LeadMessage[]; error?: string };
+
+    if (!response.ok) {
+      setError(data.error || "Não foi possível editar o lead.");
+      return;
+    }
+
+    if (data.lead) setSelectedLead(data.lead);
+    if (data.messages) setMessages(data.messages);
+    setEditingLead(false);
+    await loadAll();
+  }
+
+  async function deleteSelectedLead() {
+    if (!selectedLead) return;
+    const confirmed = window.confirm("Excluir este lead e todo o histórico da conversa?");
+    if (!confirmed) return;
+
+    const response = await fetch("/api/admin/leads", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      body: JSON.stringify({ action: "delete", leadId: selectedLead.id })
+    });
+
+    if (!response.ok) {
+      setError("Não foi possível excluir o lead.");
+      return;
+    }
+
+    setSelectedLead(null);
+    setMessages([]);
     await loadAll();
   }
 
@@ -394,8 +451,10 @@ export function AdminPipeline() {
               )}
             </div>
             <p className="mt-5 text-sm text-graphite/58">
-              Status da chave: {settings.hasApiKey ? "configurada" : "não configurada"}. Sem chave, a Iris registra a conversa e aguarda resposta humana.
+              Status da chave: {settings.hasApiKey ? `configurada${settings.apiKeyLast4 ? ` (final ${settings.apiKeyLast4})` : ""}` : "não configurada"}.
+              Sem chave, a Iris registra a conversa e aguarda resposta humana.
             </p>
+            {settings.storagePath && <p className="mt-2 text-xs text-graphite/42">Banco em uso: {settings.storagePath}</p>}
           </form>
         </section>
       )}
@@ -406,16 +465,65 @@ export function AdminPipeline() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="eyebrow">Lead Iris</p>
-                <h2 className="mt-2 text-3xl font-light text-graphite">{selectedLead.name}</h2>
-                <p className="mt-3 text-sm leading-6 text-graphite/62">
-                  {selectedLead.email}
-                  <br />
-                  {selectedLead.whatsapp}
-                </p>
+                {!editingLead ? (
+                  <>
+                    <h2 className="mt-2 text-3xl font-light text-graphite">{selectedLead.name}</h2>
+                    <p className="mt-3 text-sm leading-6 text-graphite/62">
+                      {selectedLead.email}
+                      <br />
+                      {selectedLead.whatsapp}
+                    </p>
+                  </>
+                ) : (
+                  <form onSubmit={saveLeadDetails} className="mt-3 grid gap-2">
+                    <input
+                      value={leadDraft.name}
+                      onChange={(event) => setLeadDraft((current) => ({ ...current, name: event.target.value }))}
+                      className="h-10 rounded-2xl border border-graphite/10 bg-porcelain px-3 text-sm outline-none focus:border-stone"
+                      placeholder="Nome"
+                    />
+                    <input
+                      value={leadDraft.email}
+                      onChange={(event) => setLeadDraft((current) => ({ ...current, email: event.target.value }))}
+                      className="h-10 rounded-2xl border border-graphite/10 bg-porcelain px-3 text-sm outline-none focus:border-stone"
+                      placeholder="E-mail"
+                    />
+                    <input
+                      value={leadDraft.whatsapp}
+                      onChange={(event) => setLeadDraft((current) => ({ ...current, whatsapp: event.target.value }))}
+                      className="h-10 rounded-2xl border border-graphite/10 bg-porcelain px-3 text-sm outline-none focus:border-stone"
+                      placeholder="WhatsApp"
+                    />
+                    <div className="flex gap-2">
+                      <button type="submit" className="h-9 rounded-full bg-graphite px-4 text-xs font-medium text-white">
+                        Salvar
+                      </button>
+                      <button type="button" onClick={() => setEditingLead(false)} className="h-9 rounded-full border border-graphite/10 px-4 text-xs">
+                        Cancelar
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
-              <button onClick={() => setSelectedLead(null)} className="rounded-full border border-graphite/10 px-4 py-2 text-sm">
-                Fechar
-              </button>
+              <div className="flex shrink-0 gap-2">
+                <button
+                  onClick={() => setEditingLead((current) => !current)}
+                  className="grid h-10 w-10 place-items-center rounded-full border border-graphite/10 text-graphite/70 transition hover:bg-porcelain"
+                  aria-label="Editar lead"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={deleteSelectedLead}
+                  className="grid h-10 w-10 place-items-center rounded-full border border-red-100 text-red-600 transition hover:bg-red-50"
+                  aria-label="Excluir lead"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <button onClick={() => setSelectedLead(null)} className="rounded-full border border-graphite/10 px-4 py-2 text-sm">
+                  Fechar
+                </button>
+              </div>
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]">
               <select
@@ -443,12 +551,24 @@ export function AdminPipeline() {
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[84%] rounded-[20px] px-4 py-3 text-sm leading-6 ${message.role === "user" ? "bg-graphite text-white" : "bg-white text-graphite/76"}`}>
+                  {message.role === "assistant" && message.sender_name && (
+                    <p className="mb-1 text-[0.68rem] font-medium uppercase tracking-[0.12em] text-graphite/42">{message.sender_name}</p>
+                  )}
                   {message.content}
                 </div>
               </div>
             ))}
           </div>
           <form onSubmit={sendManualMessage} className="border-t border-graphite/10 bg-white p-4">
+            <label className="mb-3 grid gap-2 text-sm text-graphite/70">
+              Nome do atendente
+              <input
+                value={attendantName}
+                onChange={(event) => setAttendantName(event.target.value)}
+                placeholder="Ex.: Camila - Equipe LQF"
+                className="h-11 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none focus:border-stone"
+              />
+            </label>
             <label className="grid gap-2 text-sm text-graphite/70">
               Responder como equipe LQF
               <textarea
