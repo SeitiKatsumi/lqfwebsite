@@ -23,7 +23,7 @@ export const navItems = [
   { href: "/#partners", label: "Partners" },
   { href: "/processo", label: "Processo LQF" },
   { href: "/private-label", label: "Private Label" },
-  { href: "/contato", label: "Contato" }
+  { href: "/contato#formulario", label: "Contato" }
 ];
 
 export const placeholders = [

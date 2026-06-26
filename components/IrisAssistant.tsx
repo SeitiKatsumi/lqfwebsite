@@ -44,6 +44,7 @@ export function IrisAssistant() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   function resetStoredLead(message = "Seu atendimento anterior não está mais disponível. Informe seus dados para iniciar um novo atendimento.") {
     window.localStorage.removeItem("lqf-iris-lead");
@@ -112,6 +113,11 @@ export function IrisAssistant() {
       window.clearInterval(interval);
     };
   }, [identity, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, loading, open]);
 
   async function startLead(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -314,6 +320,7 @@ export function IrisAssistant() {
                       </div>
                     </div>
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
 
                 <div className="border-t border-graphite/10 bg-white p-4">

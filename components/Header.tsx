@@ -3,20 +3,27 @@
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { navItems } from "@/lib/site";
 import { Logo } from "@/components/Logo";
 import { MinimalButton } from "@/components/MinimalButton";
 
 export function Header() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  const isAdmin = pathname?.startsWith("/admin");
+
   useEffect(() => {
+    if (isAdmin) return;
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [isAdmin]);
+
+  if (isAdmin) return null;
 
   return (
     <header className="fixed left-0 right-0 top-4 z-50 px-4">
@@ -34,7 +41,7 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:block">
-          <MinimalButton href="/contato">Desenvolva sua linha</MinimalButton>
+          <MinimalButton href="/contato#formulario">Desenvolva sua linha</MinimalButton>
         </div>
 
         <button
@@ -61,7 +68,7 @@ export function Header() {
             ))}
           </nav>
           <div className="mt-3">
-            <MinimalButton href="/contato">Desenvolva sua linha</MinimalButton>
+            <MinimalButton href="/contato#formulario">Desenvolva sua linha</MinimalButton>
           </div>
         </div>
       )}

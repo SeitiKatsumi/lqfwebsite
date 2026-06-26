@@ -26,7 +26,7 @@ export function HeroSection({
           <h1 className="display-title mt-7">{title}</h1>
           <p className="body-large mt-8 max-w-2xl">{subtitle}</p>
           <div className="mt-9 flex flex-wrap gap-3">
-            <MinimalButton href="/contato">{primary}</MinimalButton>
+            <MinimalButton href="/contato#formulario">{primary}</MinimalButton>
             {secondary && <MinimalButton href="/tecnologia" variant="ghost">{secondary}</MinimalButton>}
           </div>
         </div>

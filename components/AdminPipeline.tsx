@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Bot, FileText, KeyRound, Loader2, Lock, MessageCircle, Pencil, RefreshCw, Send, Sparkles, Trash2 } from "lucide-react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Bot, Code2, FileText, KeyRound, Loader2, Lock, MessageCircle, Pencil, RefreshCw, Send, Sparkles, Trash2 } from "lucide-react";
+import { WordpressHtmlGenerator } from "@/components/WordpressHtmlGenerator";
 
 type LeadStatus =
   | "em_atendimento_ia"
@@ -78,7 +79,7 @@ const labels: Record<LeadStatus, string> = {
 export function AdminPipeline() {
   const [adminKey, setAdminKey] = useState("");
   const [savedKey, setSavedKey] = useState("");
-  const [activeView, setActiveView] = useState<"iris" | "forms" | "settings">("iris");
+  const [activeView, setActiveView] = useState<"iris" | "forms" | "settings" | "wordpress">("iris");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [settings, setSettings] = useState<ChatSettings>({ hasApiKey: false, additionalPrompt: "" });
@@ -89,18 +90,22 @@ export function AdminPipeline() {
   const [messages, setMessages] = useState<LeadMessage[]>([]);
   const [manualMessage, setManualMessage] = useState("");
   const [attendantName, setAttendantName] = useState("");
+  const [attendantPhoto, setAttendantPhoto] = useState("");
   const [editingLead, setEditingLead] = useState(false);
   const [leadDraft, setLeadDraft] = useState({ name: "", email: "", whatsapp: "" });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("lqf-admin-key") || "";
     const storedAttendant = window.localStorage.getItem("lqf-attendant-name") || "";
+    const storedAttendantPhoto = window.localStorage.getItem("lqf-attendant-photo") || "";
     setSavedKey(stored);
     setAdminKey(stored);
     setAttendantName(storedAttendant);
+    setAttendantPhoto(storedAttendantPhoto);
   }, []);
 
   useEffect(() => {
@@ -112,6 +117,23 @@ export function AdminPipeline() {
     setPromptInput(settings.additionalPrompt || "");
   }, [settings.additionalPrompt]);
 
+  useEffect(() => {
+    if (!savedKey) return;
+
+    const interval = window.setInterval(() => {
+      void loadAll(savedKey, true);
+      if (selectedLead?.id) void refreshSelectedLead(selectedLead.id, true);
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedKey, selectedLead?.id]);
+
+  useEffect(() => {
+    if (!selectedLead) return;
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, selectedLead]);
+
   const grouped = useMemo(
     () =>
       statuses.map((status) => ({
@@ -121,10 +143,12 @@ export function AdminPipeline() {
     [leads]
   );
 
-  async function loadAll(key = savedKey) {
+  async function loadAll(key = savedKey, silent = false) {
     if (!key) return;
-    setLoading(true);
-    setError("");
+    if (!silent) {
+      setLoading(true);
+      setError("");
+    }
 
     try {
       const [leadResponse, contactResponse, settingsResponse] = await Promise.all([
@@ -137,17 +161,20 @@ export function AdminPipeline() {
       const settingsData = (await settingsResponse.json()) as { settings?: ChatSettings };
 
       if (!leadResponse.ok) {
+        if (silent) return;
         setError(leadData.error || "Acesso não autorizado.");
         return;
       }
 
-      setLeads(leadData.leads || []);
+      const nextLeads = leadData.leads || [];
+      setLeads(nextLeads);
+      setSelectedLead((current) => (current ? nextLeads.find((lead) => lead.id === current.id) ?? current : current));
       setSubmissions(contactData.submissions || []);
       setSettings(settingsData.settings || leadData.settings || { hasApiKey: false, additionalPrompt: "" });
     } catch {
-      setError("Não foi possível carregar o admin.");
+      if (!silent) setError("Nao foi possivel carregar o admin.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 
@@ -159,11 +186,25 @@ export function AdminPipeline() {
     setEditingLead(false);
     setLeadDraft({ name: lead.name, email: lead.email, whatsapp: lead.whatsapp });
 
-    const response = await fetch(`/api/admin/leads?leadId=${lead.id}`, { headers: { "x-admin-key": savedKey }, cache: "no-store" });
+    await refreshSelectedLead(lead.id);
+  }
+
+  async function refreshSelectedLead(leadId: string, silent = false) {
+    const response = await fetch(`/api/admin/leads?leadId=${leadId}`, { headers: { "x-admin-key": savedKey }, cache: "no-store" });
+
+    if (response.status === 404) {
+      setSelectedLead(null);
+      setMessages([]);
+      if (!silent) setError("Lead nÃ£o encontrado.");
+      return;
+    }
+
     const data = (await response.json()) as { lead?: Lead; messages?: LeadMessage[] };
     if (data.lead) {
       setSelectedLead(data.lead);
-      setLeadDraft({ name: data.lead.name, email: data.lead.email, whatsapp: data.lead.whatsapp });
+      if (!editingLead) {
+        setLeadDraft({ name: data.lead.name, email: data.lead.email, whatsapp: data.lead.whatsapp });
+      }
     }
     setMessages(data.messages || []);
   }
@@ -197,7 +238,7 @@ export function AdminPipeline() {
     event.preventDefault();
     if (!selectedLead || !manualMessage.trim()) return;
 
-    window.localStorage.setItem("lqf-attendant-name", attendantName.trim());
+    updateAttendantName(attendantName.trim());
     const response = await fetch("/api/admin/leads", {
       method: "PATCH",
       headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
@@ -207,6 +248,29 @@ export function AdminPipeline() {
     setMessages(data.messages || messages);
     setManualMessage("");
     await loadAll();
+  }
+
+  function updateAttendantName(value: string) {
+    setAttendantName(value);
+    window.localStorage.setItem("lqf-attendant-name", value);
+  }
+
+  function handleAttendantPhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      setAttendantPhoto(result);
+      window.localStorage.setItem("lqf-attendant-photo", result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeAttendantPhoto() {
+    setAttendantPhoto("");
+    window.localStorage.removeItem("lqf-attendant-photo");
   }
 
   async function saveLeadDetails(event: FormEvent<HTMLFormElement>) {
@@ -323,7 +387,7 @@ export function AdminPipeline() {
   }
 
   return (
-    <main className="min-h-svh bg-white pt-28">
+    <main className="min-h-svh bg-white pt-12">
       <section className="section-shell pb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -347,6 +411,9 @@ export function AdminPipeline() {
           </TabButton>
           <TabButton active={activeView === "settings"} onClick={() => setActiveView("settings")} icon={<KeyRound className="h-4 w-4" />}>
             Configurações Iris
+          </TabButton>
+          <TabButton active={activeView === "wordpress"} onClick={() => setActiveView("wordpress")} icon={<Code2 className="h-4 w-4" />}>
+            Wordpress HTML Generator
           </TabButton>
         </div>
         {error && <p className="mt-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
@@ -418,6 +485,34 @@ export function AdminPipeline() {
                 <p className="text-sm text-graphite/60">A Iris usa o conteúdo do site como contexto e este prompt adicional como orientação.</p>
               </div>
             </div>
+            <div className="mt-8 rounded-[24px] border border-graphite/10 bg-white p-5">
+              <p className="text-sm font-medium text-graphite">Perfil do atendente</p>
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-full bg-porcelain text-sm font-medium text-graphite/60">
+                  {attendantPhoto ? <img src={attendantPhoto} alt="" className="h-full w-full object-cover" /> : (attendantName.trim().charAt(0) || "I")}
+                </div>
+                <label className="grid min-w-[240px] flex-1 gap-2 text-sm text-graphite/70">
+                  Nome que aparece no chat
+                  <input
+                    value={attendantName}
+                    onChange={(event) => updateAttendantName(event.target.value)}
+                    placeholder="Ex.: Camila - Equipe LQF"
+                    className="h-11 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none focus:border-stone"
+                  />
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <label className="grid h-11 cursor-pointer place-items-center rounded-full border border-graphite/10 px-5 text-sm text-graphite/70 transition hover:bg-porcelain">
+                    Foto
+                    <input type="file" accept="image/*" onChange={handleAttendantPhotoChange} className="sr-only" />
+                  </label>
+                  {attendantPhoto && (
+                    <button type="button" onClick={removeAttendantPhoto} className="h-11 rounded-full border border-graphite/10 px-5 text-sm text-graphite/70">
+                      Remover
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
             <div className="mt-8 grid gap-5">
               <label className="grid gap-2 text-sm text-graphite/70">
                 OpenAI API Key
@@ -458,6 +553,8 @@ export function AdminPipeline() {
           </form>
         </section>
       )}
+
+      {activeView === "wordpress" && <WordpressHtmlGenerator adminKey={savedKey} />}
 
       {selectedLead && (
         <aside className="fixed inset-y-0 right-0 z-[90] flex w-full max-w-[560px] flex-col border-l border-graphite/10 bg-white shadow-[0_0_80px_rgba(63,63,59,0.16)]">
@@ -558,13 +655,14 @@ export function AdminPipeline() {
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <form onSubmit={sendManualMessage} className="border-t border-graphite/10 bg-white p-4">
             <label className="mb-3 grid gap-2 text-sm text-graphite/70">
               Nome do atendente
               <input
                 value={attendantName}
-                onChange={(event) => setAttendantName(event.target.value)}
+                onChange={(event) => updateAttendantName(event.target.value)}
                 placeholder="Ex.: Camila - Equipe LQF"
                 className="h-11 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none focus:border-stone"
               />

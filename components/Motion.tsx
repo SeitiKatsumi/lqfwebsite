@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 export function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
@@ -18,7 +19,11 @@ export function Reveal({ children, className = "", delay = 0 }: { children: Reac
 }
 
 export function ScrollProgress() {
+  const pathname = usePathname();
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  if (pathname?.startsWith("/admin")) return null;
+
   return <motion.div style={{ scaleX }} className="fixed left-0 top-0 z-[70] h-[2px] w-full origin-left bg-brass" />;
 }

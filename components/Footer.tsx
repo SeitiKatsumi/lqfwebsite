@@ -1,9 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { navItems } from "@/lib/site";
 import { Logo } from "@/components/Logo";
 
 export function Footer() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <footer className="border-t border-graphite/10 bg-porcelain text-graphite">
       <div className="section-shell grid gap-12 py-16 md:grid-cols-[1.2fr_0.8fr_0.9fr]">

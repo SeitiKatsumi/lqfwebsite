@@ -17,7 +17,7 @@ export default function ContatoPage() {
         image={conceptImages.contact}
         compact
       />
-      <section className="section-shell grid gap-10 py-16 md:py-28 lg:grid-cols-[0.8fr_1.2fr]">
+      <section id="formulario" className="section-shell scroll-mt-28 grid gap-10 py-16 md:py-28 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <SectionTitle
             eyebrow="Projeto"
