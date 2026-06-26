@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { CardGrid } from "@/components/CardGrid";
 import { CTASection } from "@/components/CTASection";
+import { EditorialHero } from "@/components/EditorialHero";
 import { HeroSection } from "@/components/HeroSection";
 import { ImageFeatureSection } from "@/components/ImageFeatureSection";
 import { MinimalButton } from "@/components/MinimalButton";
@@ -10,7 +11,7 @@ import { ProcessTimeline } from "@/components/ProcessTimeline";
 import { ProductCategoryCard } from "@/components/ProductCategoryCard";
 import { Reveal } from "@/components/Motion";
 import { SectionTitle } from "@/components/SectionTitle";
-import { authorityPillars, pageMeta, placeholders, productCategories, qualityItems, technologyItems } from "@/lib/site";
+import { authorityPillars, conceptImages, pageMeta, productCategories, qualityItems, technologyItems } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta.home;
 
@@ -21,7 +22,7 @@ export default function HomePage() {
         eyebrow=""
         title="A ciência por trás da beleza."
         subtitle="A LQF Farmacêutica desenvolve, regulariza e fabrica cosméticos e dermocosméticos para marcas que buscam qualidade, segurança e alto padrão técnico."
-        image={placeholders[0]}
+        image={conceptImages.hero}
         secondary="Conheça a estrutura LQF"
       />
 
@@ -33,10 +34,17 @@ export default function HomePage() {
             text="A LQF é parceira de marcas que desejam transformar ideias, fórmulas e projetos em produtos cosméticos e dermocosméticos prontos para competir com segurança, desempenho e credibilidade."
           />
           <Reveal delay={0.1} className="relative min-h-[480px] overflow-hidden rounded-[2rem] bg-mist shadow-soft">
-            <Image src={placeholders[1]} alt="" fill sizes="(min-width: 1024px) 55vw, 100vw" className="object-cover" />
+            <Image src={conceptImages.manifesto} alt="" fill sizes="(min-width: 1024px) 55vw, 100vw" className="object-cover" />
           </Reveal>
         </div>
       </section>
+
+      <EditorialHero
+        eyebrow="Presenca de marca"
+        title="Produtos que chegam ao mercado com aparencia de linha pronta."
+        text="Da formula ao acabamento visual, cada projeto precisa sustentar desejo, credibilidade e padrao tecnico desde o primeiro lote."
+        image={conceptImages.editorialA}
+      />
 
       <section className="section-shell py-16 md:py-28">
         <SectionTitle eyebrow="Autoridade" title="Estrutura técnica para marcas que exigem mais." />
@@ -49,7 +57,7 @@ export default function HomePage() {
         eyebrow="Sobre"
         title="Uma indústria farmacêutica dedicada à criação de produtos de beleza."
         text="Atuamos como parceira estratégica para marcas que desejam lançar, ampliar ou profissionalizar suas linhas com uma estrutura técnica robusta, segura e preparada para atender às exigências do mercado."
-        image={placeholders[2]}
+        image={conceptImages.about}
         reverse
         button={{ href: "/sobre", label: "Conheça a LQF" }}
       />
@@ -94,8 +102,16 @@ export default function HomePage() {
         eyebrow="Private Label"
         title="Sua marca. Nossa estrutura."
         text="A LQF atua no modelo Private Label para empresas que desejam lançar produtos próprios com uma estrutura farmacêutica preparada para desenvolver, fabricar e entregar cosméticos e dermocosméticos com alto padrão técnico."
-        image={placeholders[0]}
+        image={conceptImages.privateLabel}
         button={{ href: "/private-label", label: "Quero desenvolver minha linha" }}
+      />
+
+      <EditorialHero
+        eyebrow="Qualidade visual e tecnica"
+        title="Sofisticacao tambem esta no controle."
+        text="A apresentacao do produto nasce junto com o rigor do processo: pesquisa, testes, embalagem, rastreabilidade e acabamento pensados como uma unica entrega."
+        image={conceptImages.quality}
+        align="right"
       />
 
       <section className="section-shell py-16 md:py-28">

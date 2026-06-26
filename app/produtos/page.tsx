@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { CTASection } from "@/components/CTASection";
+import { EditorialHero } from "@/components/EditorialHero";
 import { HeroSection } from "@/components/HeroSection";
 import { ProductCategoryCard } from "@/components/ProductCategoryCard";
 import { SectionTitle } from "@/components/SectionTitle";
-import { pageMeta, placeholders, productCategories } from "@/lib/site";
+import { conceptImages, pageMeta, productCategories } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta.produtos;
 
@@ -14,8 +15,14 @@ export default function ProdutosPage() {
         eyebrow="Produtos"
         title="Um portfólio técnico para marcas de beleza, cuidado e tratamento."
         subtitle="Desenvolvemos e fabricamos linhas completas de cosméticos, dermocosméticos e produtos de cuidado pessoal, com formulações adaptadas ao posicionamento de cada marca."
-        image={placeholders[0]}
+        image={conceptImages.products}
         compact
+      />
+      <EditorialHero
+        eyebrow="Arquitetura de linha"
+        title="Categorias com presenca visual desde a primeira apresentacao."
+        text="A leitura da linha precisa ser imediata: capilar, facial, corporal, infantil, materna ou sob demanda, cada categoria ganha uma imagem propria para sustentar posicionamento."
+        image={conceptImages.packaging}
       />
       <section className="section-shell py-16 md:py-28">
         <SectionTitle

@@ -3,7 +3,7 @@ import { ContactForm } from "@/components/ContactForm";
 import { HeroSection } from "@/components/HeroSection";
 import { Reveal } from "@/components/Motion";
 import { SectionTitle } from "@/components/SectionTitle";
-import { pageMeta, placeholders } from "@/lib/site";
+import { conceptImages, pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta.contato;
 
@@ -14,7 +14,7 @@ export default function ContatoPage() {
         eyebrow="Contato"
         title="Vamos desenvolver sua linha?"
         subtitle="Conte com a LQF Farmacêutica para transformar sua ideia em um produto pronto para o mercado."
-        image={placeholders[0]}
+        image={conceptImages.contact}
         compact
       />
       <section className="section-shell grid gap-10 py-16 md:py-28 lg:grid-cols-[0.8fr_1.2fr]">

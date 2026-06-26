@@ -5,7 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { ImageFeatureSection } from "@/components/ImageFeatureSection";
 import { Reveal } from "@/components/Motion";
 import { SectionTitle } from "@/components/SectionTitle";
-import { differentials, pageMeta, placeholders } from "@/lib/site";
+import { conceptImages, differentials, pageMeta } from "@/lib/site";
 import { CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = pageMeta.sobre;
@@ -32,14 +32,14 @@ export default function SobrePage() {
         eyebrow="Sobre a LQF"
         title="A ciência por trás da beleza."
         subtitle="Somos uma indústria farmacêutica especializada em transformar ideias, fórmulas e projetos em cosméticos e dermocosméticos prontos para o mercado."
-        image={placeholders[2]}
+        image={conceptImages.about}
         compact
       />
       <ImageFeatureSection
         eyebrow="Quem somos"
         title="Por trás de grandes produtos, existe uma estrutura técnica."
         text="A LQF Farmacêutica une ciência, tecnologia, controle de qualidade e capacidade produtiva para transformar ideias em produtos prontos para competir com alto padrão de segurança, desempenho e apresentação."
-        image={placeholders[0]}
+        image={conceptImages.editorialB}
       />
       <section className="section-shell py-16 md:py-28">
         <SectionTitle eyebrow="Essência" title="Ciência, qualidade e consistência como base de crescimento." />

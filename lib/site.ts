@@ -32,6 +32,32 @@ export const placeholders = [
   "/placeholder/lqf-brand-03.png"
 ];
 
+export const conceptImages = {
+  hero: "/concept/concept-09.png",
+  manifesto: "/concept/concept-11.png",
+  about: "/concept/concept-23.png",
+  technology: "/concept/concept-16.png",
+  products: "/concept/concept-13.png",
+  process: "/concept/concept-20.png",
+  privateLabel: "/concept/concept-06.png",
+  contact: "/concept/concept-01.png",
+  quality: "/concept/concept-19.png",
+  packaging: "/concept/concept-04.png",
+  demand: "/concept/concept-10.png",
+  editorialA: "/concept/concept-17.png",
+  editorialB: "/concept/concept-24.png"
+};
+
+export const lineImages = {
+  capilar: "/lines/capilar.png",
+  facial: "/lines/facial.png",
+  corporal: "/lines/corporal.png",
+  maosEPes: "/lines/maos-e-pes.png",
+  unhas: "/lines/unhas.png",
+  bebeInfantil: "/lines/bebe-infantil.png",
+  materna: "/lines/materna.png"
+};
+
 export const authorityPillars = [
   {
     title: "Desenvolvimento",
@@ -70,42 +96,42 @@ export const productCategories = [
   {
     title: "Linha Capilar",
     text: "Tratamento do couro cabeludo, reconstrução, manutenção, finalização, matização, cachos e transformação capilar.",
-    image: placeholders[0]
+    image: lineImages.capilar
   },
   {
     title: "Linha Facial",
     text: "Limpeza, tratamento, renovação, hidratação, proteção, uniformização e acabamento da pele.",
-    image: placeholders[1]
+    image: lineImages.facial
   },
   {
     title: "Linha Corporal",
     text: "Hidratação, cuidado diário, tratamento estético, perfumação e bem-estar.",
-    image: placeholders[2]
+    image: lineImages.corporal
   },
   {
     title: "Mãos e Pés",
     text: "Hidratação, conforto, proteção, cuidado específico, controle de odores e tratamento.",
-    image: placeholders[0]
+    image: lineImages.maosEPes
   },
   {
     title: "Unhas",
     text: "Esmaltação, bases, removedores, acabamento, tratamento e preparação das unhas.",
-    image: placeholders[1]
+    image: lineImages.unhas
   },
   {
     title: "Bebê e Infantil",
     text: "Cuidado da pele e cabelos de bebês e crianças, com suavidade, segurança e sensorialidade.",
-    image: placeholders[2]
+    image: lineImages.bebeInfantil
   },
   {
     title: "Linha Materna",
     text: "Cuidado da pele durante a maternidade, com foco em hidratação, proteção e bem-estar.",
-    image: placeholders[0]
+    image: lineImages.materna
   },
   {
     title: "Sob demanda",
     text: "Formulações criadas ou adaptadas conforme estratégia, performance, requisitos regulatórios e viabilidade produtiva.",
-    image: placeholders[1]
+    image: conceptImages.demand
   }
 ];
 

@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
 import { CardGrid } from "@/components/CardGrid";
 import { CTASection } from "@/components/CTASection";
+import { EditorialHero } from "@/components/EditorialHero";
 import { HeroSection } from "@/components/HeroSection";
 import { ImageFeatureSection } from "@/components/ImageFeatureSection";
 import { SectionTitle } from "@/components/SectionTitle";
-import { pageMeta, placeholders, technologyItems } from "@/lib/site";
+import { conceptImages, pageMeta, technologyItems } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta.tecnologia;
+
+const technologyImages = [
+  conceptImages.technology,
+  conceptImages.editorialB,
+  conceptImages.quality,
+  conceptImages.packaging,
+  conceptImages.about,
+  conceptImages.editorialA
+];
 
 export default function TecnologiaPage() {
   return (
@@ -15,8 +25,15 @@ export default function TecnologiaPage() {
         eyebrow="Tecnologia"
         title="Tecnologia aplicada à precisão industrial."
         subtitle="Processos controlados, ambientes adequados, laboratórios equipados e sistemas de qualidade para desenvolver e fabricar produtos com segurança e consistência."
-        image={placeholders[1]}
+        image={conceptImages.technology}
         compact
+      />
+      <EditorialHero
+        eyebrow="Precisao industrial"
+        title="Tecnica, acabamento e controle no mesmo padrao."
+        text="A estrutura produtiva sustenta tanto a seguranca do processo quanto a percepcao de valor que a marca entrega no ponto de contato com o consumidor."
+        image={conceptImages.editorialB}
+        align="right"
       />
       <section className="section-shell py-16 md:py-28">
         <SectionTitle
@@ -34,7 +51,7 @@ export default function TecnologiaPage() {
           eyebrow="Bloco técnico"
           title={item.title}
           text={item.text}
-          image={placeholders[index % placeholders.length]}
+          image={technologyImages[index % technologyImages.length]}
           reverse={index % 2 === 1}
         />
       ))}

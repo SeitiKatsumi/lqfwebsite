@@ -3,7 +3,7 @@ import { CTASection } from "@/components/CTASection";
 import { HeroSection } from "@/components/HeroSection";
 import { ProcessTimeline } from "@/components/ProcessTimeline";
 import { SectionTitle } from "@/components/SectionTitle";
-import { pageMeta, placeholders } from "@/lib/site";
+import { conceptImages, pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta.processo;
 
@@ -14,7 +14,7 @@ export default function ProcessoPage() {
         eyebrow="Processo LQF"
         title="Da ideia ao produto pronto para o mercado."
         subtitle="Um processo estruturado para transformar conceitos em produtos cosméticos e dermocosméticos reais, seguros e competitivos."
-        image={placeholders[2]}
+        image={conceptImages.process}
         compact
       />
       <section className="section-shell py-16 md:py-28">
