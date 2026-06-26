@@ -4,7 +4,7 @@ import { FormEvent, useMemo, useState } from "react";
 import { Code2, Copy, Loader2, Sparkles } from "lucide-react";
 import { fallbackWordpressBlock, wordpressFooterHtml, wordpressHeaderHtml, wordpressPages } from "@/lib/wordpressHtmlTemplates";
 
-export function WordpressHtmlGenerator({ adminKey }: { adminKey: string }) {
+export function WordpressHtmlGenerator({ authHeaders }: { authHeaders: Record<string, string> }) {
   const [page, setPage] = useState("home");
   const [prompt, setPrompt] = useState("Crie uma secao editorial premium com titulo forte, texto consultivo e CTA para contato.");
   const [generatedHtml, setGeneratedHtml] = useState(() => fallbackWordpressBlock({ page: "home", prompt: "" }));
@@ -29,7 +29,7 @@ export function WordpressHtmlGenerator({ adminKey }: { adminKey: string }) {
     try {
       const response = await fetch("/api/admin/wp-html", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+        headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({ page, prompt })
       });
       const data = (await response.json()) as { html?: string; source?: "ai" | "fallback" };

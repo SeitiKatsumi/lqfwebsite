@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Bot, Code2, FileText, KeyRound, Loader2, Lock, MessageCircle, Pencil, RefreshCw, Send, Sparkles, Trash2 } from "lucide-react";
+import { Bot, Code2, FileText, KeyRound, Loader2, Lock, LogOut, MessageCircle, Pencil, RefreshCw, Send, Sparkles, Trash2, UserPlus } from "lucide-react";
 import { WordpressHtmlGenerator } from "@/components/WordpressHtmlGenerator";
 
 type LeadStatus =
@@ -56,6 +56,15 @@ type ChatSettings = {
   storagePath?: string;
 };
 
+type AdminUser = {
+  id: string;
+  username: string;
+  name: string;
+  photo: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 const statuses: LeadStatus[] = [
   "em_atendimento_ia",
   "solicitou_orcamento",
@@ -78,11 +87,18 @@ const labels: Record<LeadStatus, string> = {
 
 export function AdminPipeline() {
   const [adminKey, setAdminKey] = useState("");
+  const [adminUsername, setAdminUsername] = useState("admin");
   const [savedKey, setSavedKey] = useState("");
+  const [savedUsername, setSavedUsername] = useState("");
   const [activeView, setActiveView] = useState<"iris" | "forms" | "settings" | "wordpress">("iris");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [settings, setSettings] = useState<ChatSettings>({ hasApiKey: false, additionalPrompt: "" });
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
+  const [usingMasterPassword, setUsingMasterPassword] = useState(false);
+  const [profileDraft, setProfileDraft] = useState({ name: "", photo: "", password: "" });
+  const [newUserDraft, setNewUserDraft] = useState({ username: "", name: "", password: "", photo: "" });
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [promptInput, setPromptInput] = useState("");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -100,10 +116,13 @@ export function AdminPipeline() {
 
   useEffect(() => {
     const stored = window.localStorage.getItem("lqf-admin-key") || "";
+    const storedUsername = window.localStorage.getItem("lqf-admin-username") || "";
     const storedAttendant = window.localStorage.getItem("lqf-attendant-name") || "";
     const storedAttendantPhoto = window.localStorage.getItem("lqf-attendant-photo") || "";
     setSavedKey(stored);
+    setSavedUsername(storedUsername);
     setAdminKey(stored);
+    setAdminUsername(storedUsername || "admin");
     setAttendantName(storedAttendant);
     setAttendantPhoto(storedAttendantPhoto);
   }, []);
@@ -143,6 +162,14 @@ export function AdminPipeline() {
     [leads]
   );
 
+  function authHeaders() {
+    return {
+      "x-admin-key": savedKey,
+      "x-admin-username": savedUsername,
+      "x-admin-password": savedKey
+    };
+  }
+
   async function loadAll(key = savedKey, silent = false) {
     if (!key) return;
     if (!silent) {
@@ -152,13 +179,15 @@ export function AdminPipeline() {
 
     try {
       const [leadResponse, contactResponse, settingsResponse] = await Promise.all([
-        fetch("/api/admin/leads", { headers: { "x-admin-key": key }, cache: "no-store" }),
-        fetch("/api/admin/leads?type=contact", { headers: { "x-admin-key": key }, cache: "no-store" }),
-        fetch("/api/admin/leads?type=settings", { headers: { "x-admin-key": key }, cache: "no-store" })
+        fetch("/api/admin/leads", { headers: { ...authHeaders(), "x-admin-key": key, "x-admin-password": key }, cache: "no-store" }),
+        fetch("/api/admin/leads?type=contact", { headers: { ...authHeaders(), "x-admin-key": key, "x-admin-password": key }, cache: "no-store" }),
+        fetch("/api/admin/leads?type=settings", { headers: { ...authHeaders(), "x-admin-key": key, "x-admin-password": key }, cache: "no-store" })
       ]);
-      const leadData = (await leadResponse.json()) as { leads?: Lead[]; error?: string; settings?: ChatSettings };
+      const leadData = (await leadResponse.json()) as { leads?: Lead[]; error?: string; settings?: ChatSettings; currentUser?: AdminUser };
       const contactData = (await contactResponse.json()) as { submissions?: ContactSubmission[] };
       const settingsData = (await settingsResponse.json()) as { settings?: ChatSettings };
+      const usersResponse = await fetch("/api/admin/leads?type=users", { headers: { ...authHeaders(), "x-admin-key": key, "x-admin-password": key }, cache: "no-store" });
+      const usersData = (await usersResponse.json().catch(() => ({}))) as { users?: AdminUser[]; currentUser?: AdminUser; usingMasterPassword?: boolean };
 
       if (!leadResponse.ok) {
         if (silent) return;
@@ -171,6 +200,16 @@ export function AdminPipeline() {
       setSelectedLead((current) => (current ? nextLeads.find((lead) => lead.id === current.id) ?? current : current));
       setSubmissions(contactData.submissions || []);
       setSettings(settingsData.settings || leadData.settings || { hasApiKey: false, additionalPrompt: "" });
+      setAdminUsers(usersData.users || []);
+      setCurrentUser(usersData.currentUser || leadData.currentUser || null);
+      setUsingMasterPassword(Boolean(usersData.usingMasterPassword));
+      if (usersData.currentUser) {
+        setProfileDraft((current) => ({
+          name: current.name || usersData.currentUser?.name || "",
+          photo: current.photo || usersData.currentUser?.photo || "",
+          password: ""
+        }));
+      }
     } catch {
       if (!silent) setError("Nao foi possivel carregar o admin.");
     } finally {
@@ -190,7 +229,7 @@ export function AdminPipeline() {
   }
 
   async function refreshSelectedLead(leadId: string, silent = false) {
-    const response = await fetch(`/api/admin/leads?leadId=${leadId}`, { headers: { "x-admin-key": savedKey }, cache: "no-store" });
+    const response = await fetch(`/api/admin/leads?leadId=${leadId}`, { headers: authHeaders(), cache: "no-store" });
 
     if (response.status === 404) {
       setSelectedLead(null);
@@ -212,7 +251,7 @@ export function AdminPipeline() {
   async function updateStatus(leadId: string, status: LeadStatus) {
     await fetch("/api/admin/leads", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ leadId, status })
     });
     await loadAll();
@@ -224,7 +263,7 @@ export function AdminPipeline() {
 
     const response = await fetch("/api/admin/leads", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ action: "ai", leadId: selectedLead.id, enabled })
     });
     const data = (await response.json()) as { lead?: Lead };
@@ -241,7 +280,7 @@ export function AdminPipeline() {
     updateAttendantName(attendantName.trim());
     const response = await fetch("/api/admin/leads", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ action: "message", leadId: selectedLead.id, content: manualMessage, senderName: attendantName })
     });
     const data = (await response.json()) as { messages?: LeadMessage[] };
@@ -273,13 +312,25 @@ export function AdminPipeline() {
     window.localStorage.removeItem("lqf-attendant-photo");
   }
 
+  function handleProfilePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      setProfileDraft((current) => ({ ...current, photo: result }));
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function saveLeadDetails(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedLead) return;
 
     const response = await fetch("/api/admin/leads", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ action: "edit", leadId: selectedLead.id, ...leadDraft })
     });
     const data = (await response.json()) as { lead?: Lead; messages?: LeadMessage[]; error?: string };
@@ -302,7 +353,7 @@ export function AdminPipeline() {
 
     const response = await fetch("/api/admin/leads", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ action: "delete", leadId: selectedLead.id })
     });
 
@@ -324,7 +375,7 @@ export function AdminPipeline() {
     try {
       const response = await fetch("/api/admin/leads", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           action: "settings",
           openaiApiKey: apiKeyInput,
@@ -349,7 +400,7 @@ export function AdminPipeline() {
     setSaving(true);
     const response = await fetch("/api/admin/leads", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", "x-admin-key": savedKey },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ action: "settings", clearApiKey: true, additionalPrompt: promptInput })
     });
     const data = (await response.json()) as { settings?: ChatSettings };
@@ -358,8 +409,83 @@ export function AdminPipeline() {
   }
 
   function unlock() {
+    window.localStorage.setItem("lqf-admin-username", adminUsername.trim().toLowerCase());
     window.localStorage.setItem("lqf-admin-key", adminKey);
+    setSavedUsername(adminUsername.trim().toLowerCase());
     setSavedKey(adminKey);
+  }
+
+  function logout() {
+    window.localStorage.removeItem("lqf-admin-key");
+    window.localStorage.removeItem("lqf-admin-username");
+    setSavedKey("");
+    setSavedUsername("");
+    setAdminKey("");
+    setLeads([]);
+    setSubmissions([]);
+    setSelectedLead(null);
+    setMessages([]);
+    setError("");
+  }
+
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/leads", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ action: "profile", ...profileDraft })
+      });
+      const data = (await response.json()) as { user?: AdminUser; users?: AdminUser[]; error?: string };
+
+      if (!response.ok) {
+        setError(data.error || "Nao foi possivel salvar o perfil.");
+        return;
+      }
+
+      if (data.user) {
+        setCurrentUser(data.user);
+        setProfileDraft({ name: data.user.name, photo: data.user.photo || "", password: "" });
+        updateAttendantName(data.user.name);
+      }
+      if (data.users) setAdminUsers(data.users);
+
+      if (profileDraft.password.trim()) {
+        window.localStorage.setItem("lqf-admin-key", profileDraft.password.trim());
+        setSavedKey(profileDraft.password.trim());
+        setAdminKey(profileDraft.password.trim());
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function createUser(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/leads", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ action: "create_user", ...newUserDraft })
+      });
+      const data = (await response.json()) as { users?: AdminUser[]; error?: string };
+
+      if (!response.ok) {
+        setError(data.error || "Nao foi possivel criar o usuario.");
+        return;
+      }
+
+      setAdminUsers(data.users || []);
+      setNewUserDraft({ username: "", name: "", password: "", photo: "" });
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (!savedKey) {
@@ -370,13 +496,19 @@ export function AdminPipeline() {
             <Lock className="h-5 w-5" />
           </div>
           <h1 className="mt-6 text-3xl font-light text-graphite">Admin LQF</h1>
-          <p className="mt-3 text-sm leading-6 text-graphite/66">Informe a chave configurada em ADMIN_PASSWORD para acessar o atendimento.</p>
+          <p className="mt-3 text-sm leading-6 text-graphite/66">Entre com seu usuário admin. Para recuperar acesso, use usuário admin e a senha mestra ADMIN_PASSWORD.</p>
+          <input
+            value={adminUsername}
+            onChange={(event) => setAdminUsername(event.target.value)}
+            placeholder="Usuário"
+            className="mt-6 h-12 w-full rounded-2xl border border-graphite/10 px-4 text-sm outline-none focus:border-stone"
+          />
           <input
             value={adminKey}
             onChange={(event) => setAdminKey(event.target.value)}
             type="password"
-            placeholder="Chave de acesso"
-            className="mt-6 h-12 w-full rounded-2xl border border-graphite/10 px-4 text-sm outline-none focus:border-stone"
+            placeholder="Senha"
+            className="mt-3 h-12 w-full rounded-2xl border border-graphite/10 px-4 text-sm outline-none focus:border-stone"
           />
           <button onClick={unlock} className="mt-4 h-12 w-full rounded-full bg-graphite text-sm font-medium text-white">
             Acessar
@@ -394,13 +526,22 @@ export function AdminPipeline() {
             <p className="eyebrow">Admin</p>
             <h1 className="mt-3 text-5xl font-light text-graphite md:text-7xl">Atendimento LQF</h1>
           </div>
-          <button
-            onClick={() => loadAll()}
-            className="flex h-11 items-center gap-2 rounded-full border border-graphite/10 px-4 text-sm text-graphite/72 transition hover:bg-porcelain"
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            Atualizar
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => loadAll()}
+              className="flex h-11 items-center gap-2 rounded-full border border-graphite/10 px-4 text-sm text-graphite/72 transition hover:bg-porcelain"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              Atualizar
+            </button>
+            <button
+              onClick={logout}
+              className="flex h-11 items-center gap-2 rounded-full border border-graphite/10 px-4 text-sm text-graphite/72 transition hover:bg-porcelain"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          </div>
         </div>
         <div className="mt-7 flex flex-wrap gap-2">
           <TabButton active={activeView === "iris"} onClick={() => setActiveView("iris")} icon={<MessageCircle className="h-4 w-4" />}>
@@ -485,6 +626,98 @@ export function AdminPipeline() {
                 <p className="text-sm text-graphite/60">A Iris usa o conteúdo do site como contexto e este prompt adicional como orientação.</p>
               </div>
             </div>
+            <div className="mt-8 grid gap-5 rounded-[24px] border border-graphite/10 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-porcelain text-sm font-medium text-graphite/60">
+                  {profileDraft.photo ? <img src={profileDraft.photo} alt="" className="h-full w-full object-cover" /> : (profileDraft.name.trim().charAt(0) || currentUser?.name?.charAt(0) || "A")}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-graphite">Meu perfil de admin</p>
+                  <p className="text-xs text-graphite/50">
+                    {currentUser?.username || savedUsername || "admin"} {usingMasterPassword ? "(senha mestra)" : ""}
+                  </p>
+                </div>
+              </div>
+              <form onSubmit={saveProfile} className="grid gap-4">
+                <label className="grid gap-2 text-sm text-graphite/70">
+                  Nome
+                  <input
+                    value={profileDraft.name}
+                    onChange={(event) => setProfileDraft((current) => ({ ...current, name: event.target.value }))}
+                    placeholder="Seu nome"
+                    className="h-11 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none focus:border-stone"
+                  />
+                </label>
+                <label className="grid gap-2 text-sm text-graphite/70">
+                  Nova senha
+                  <input
+                    value={profileDraft.password}
+                    onChange={(event) => setProfileDraft((current) => ({ ...current, password: event.target.value }))}
+                    type="password"
+                    placeholder={usingMasterPassword ? "Crie um usuario para trocar senha propria" : "Deixe vazio para manter a atual"}
+                    disabled={usingMasterPassword}
+                    className="h-11 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none focus:border-stone disabled:opacity-50"
+                  />
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <label className="grid h-11 cursor-pointer place-items-center rounded-full border border-graphite/10 px-5 text-sm text-graphite/70 transition hover:bg-porcelain">
+                    Foto do perfil
+                    <input type="file" accept="image/*" onChange={handleProfilePhotoChange} className="sr-only" disabled={usingMasterPassword} />
+                  </label>
+                  <button type="submit" disabled={saving || usingMasterPassword} className="h-11 rounded-full bg-graphite px-5 text-sm font-medium text-white disabled:opacity-50">
+                    Salvar perfil
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div className="mt-8 grid gap-5 rounded-[24px] border border-graphite/10 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-porcelain text-graphite">
+                  <UserPlus className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-graphite">Criar novos usuários</p>
+                  <p className="text-xs text-graphite/50">Use para dar acesso individual ao admin sem depender da senha mestra.</p>
+                </div>
+              </div>
+              <form onSubmit={createUser} className="grid gap-3 md:grid-cols-3">
+                <input
+                  value={newUserDraft.username}
+                  onChange={(event) => setNewUserDraft((current) => ({ ...current, username: event.target.value }))}
+                  placeholder="usuario"
+                  className="h-11 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none focus:border-stone"
+                />
+                <input
+                  value={newUserDraft.name}
+                  onChange={(event) => setNewUserDraft((current) => ({ ...current, name: event.target.value }))}
+                  placeholder="Nome"
+                  className="h-11 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none focus:border-stone"
+                />
+                <input
+                  value={newUserDraft.password}
+                  onChange={(event) => setNewUserDraft((current) => ({ ...current, password: event.target.value }))}
+                  type="password"
+                  placeholder="Senha"
+                  className="h-11 rounded-2xl border border-graphite/10 bg-porcelain px-4 text-sm outline-none focus:border-stone"
+                />
+                <button type="submit" disabled={saving} className="h-11 rounded-full bg-graphite px-5 text-sm font-medium text-white disabled:opacity-50 md:col-span-3">
+                  Criar usuário
+                </button>
+              </form>
+              {adminUsers.length > 0 && (
+                <div className="grid gap-2">
+                  {adminUsers.map((user) => (
+                    <div key={user.id} className="flex items-center gap-3 rounded-2xl bg-porcelain px-4 py-3 text-sm text-graphite/70">
+                      <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-white text-xs font-medium">
+                        {user.photo ? <img src={user.photo} alt="" className="h-full w-full object-cover" /> : user.name.charAt(0)}
+                      </div>
+                      <span className="font-medium text-graphite">{user.name}</span>
+                      <span className="text-graphite/45">@{user.username}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="mt-8 rounded-[24px] border border-graphite/10 bg-white p-5">
               <p className="text-sm font-medium text-graphite">Perfil do atendente</p>
               <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -554,7 +787,7 @@ export function AdminPipeline() {
         </section>
       )}
 
-      {activeView === "wordpress" && <WordpressHtmlGenerator adminKey={savedKey} />}
+      {activeView === "wordpress" && <WordpressHtmlGenerator authHeaders={authHeaders()} />}
 
       {selectedLead && (
         <aside className="fixed inset-y-0 right-0 z-[90] flex w-full max-w-[560px] flex-col border-l border-graphite/10 bg-white shadow-[0_0_80px_rgba(63,63,59,0.16)]">

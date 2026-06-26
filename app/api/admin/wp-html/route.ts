@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
+import { authenticateAdmin } from "@/lib/adminAuth";
 import { getChatSettings } from "@/lib/leadStore";
 import { fallbackWordpressBlock, wordpressPages } from "@/lib/wordpressHtmlTemplates";
 
 export const runtime = "nodejs";
-
-function isAuthorized(request: Request) {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) return process.env.NODE_ENV !== "production";
-  return request.headers.get("x-admin-key") === adminPassword;
-}
 
 function adminJson(data: unknown, init?: ResponseInit) {
   const response = NextResponse.json(data, init);
@@ -42,7 +37,7 @@ function cleanHtml(value: string) {
 }
 
 export async function POST(request: Request) {
-  if (!isAuthorized(request)) {
+  if (!authenticateAdmin(request).authorized) {
     return adminJson({ error: "Acesso admin nao autorizado." }, { status: 401 });
   }
 

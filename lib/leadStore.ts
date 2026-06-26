@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -70,6 +70,15 @@ export type ContactSubmission = {
 export type ChatSettings = {
   openai_api_key: string;
   additional_prompt: string;
+};
+
+export type AdminUser = {
+  id: string;
+  username: string;
+  name: string;
+  photo: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 let database: DatabaseSync | null = null;
@@ -152,6 +161,16 @@ function getDb() {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id TEXT PRIMARY KEY,
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      name TEXT NOT NULL,
+      photo TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
 
   const leadColumns = database.prepare("PRAGMA table_info(leads)").all() as Array<{ name: string }>;
@@ -165,6 +184,21 @@ function getDb() {
   }
 
   return database;
+}
+
+function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password: string, storedHash: string) {
+  const [salt, hash] = storedHash.split(":");
+  if (!salt || !hash) return false;
+
+  const expected = Buffer.from(hash, "hex");
+  const actual = scryptSync(password, salt, 64);
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
 export function isLeadStatus(value: unknown): value is LeadStatus {
@@ -379,4 +413,74 @@ export function updateChatSettings(input: { openaiApiKey?: string; additionalPro
   }
 
   return getPublicChatSettings();
+}
+
+export function countAdminUsers() {
+  const row = getDb().prepare("SELECT COUNT(*) as total FROM admin_users").get() as { total: number };
+  return row.total;
+}
+
+export function listAdminUsers() {
+  return getDb()
+    .prepare("SELECT id, username, name, photo, created_at, updated_at FROM admin_users ORDER BY name ASC")
+    .all() as AdminUser[];
+}
+
+export function getAdminUserByUsername(username: string) {
+  const user = getDb()
+    .prepare("SELECT id, username, name, photo, created_at, updated_at FROM admin_users WHERE username = ?")
+    .get(username.trim().toLowerCase()) as AdminUser | undefined;
+  return user ?? null;
+}
+
+export function verifyAdminUser(username: string, password: string) {
+  const row = getDb()
+    .prepare("SELECT * FROM admin_users WHERE username = ?")
+    .get(username.trim().toLowerCase()) as (AdminUser & { password_hash: string }) | undefined;
+
+  if (!row || !verifyPassword(password, row.password_hash)) return null;
+  return {
+    id: row.id,
+    username: row.username,
+    name: row.name,
+    photo: row.photo,
+    created_at: row.created_at,
+    updated_at: row.updated_at
+  } satisfies AdminUser;
+}
+
+export function createAdminUser(input: { username: string; password: string; name: string; photo?: string }) {
+  const db = getDb();
+  const createdAt = now();
+  const username = input.username.trim().toLowerCase();
+  const name = input.name.trim();
+
+  db.prepare(
+    "INSERT INTO admin_users (id, username, password_hash, name, photo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run(randomUUID(), username, hashPassword(input.password), name, input.photo?.trim() || null, createdAt, createdAt);
+
+  return getAdminUserByUsername(username);
+}
+
+export function updateAdminUserProfile(username: string, input: { name?: string; photo?: string | null; password?: string }) {
+  const db = getDb();
+  const current = getAdminUserByUsername(username);
+  if (!current) return null;
+
+  const nextName = typeof input.name === "string" && input.name.trim() ? input.name.trim() : current.name;
+  const nextPhoto = input.photo === undefined ? current.photo : input.photo?.trim() || null;
+
+  if (typeof input.password === "string" && input.password.trim()) {
+    db.prepare("UPDATE admin_users SET name = ?, photo = ?, password_hash = ?, updated_at = ? WHERE username = ?").run(
+      nextName,
+      nextPhoto,
+      hashPassword(input.password.trim()),
+      now(),
+      current.username
+    );
+  } else {
+    db.prepare("UPDATE admin_users SET name = ?, photo = ?, updated_at = ? WHERE username = ?").run(nextName, nextPhoto, now(), current.username);
+  }
+
+  return getAdminUserByUsername(current.username);
 }

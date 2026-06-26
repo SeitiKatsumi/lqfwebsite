@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { authenticateAdmin } from "@/lib/adminAuth";
 import {
   addLeadMessage,
+  createAdminUser,
   deleteLead,
   getLead,
   getLeadMessages,
@@ -8,8 +10,10 @@ import {
   isLeadStatus,
   leadStatusLabels,
   leadStatuses,
+  listAdminUsers,
   listContactSubmissions,
   listLeads,
+  updateAdminUserProfile,
   updateChatSettings,
   updateLeadAiEnabled,
   updateLeadDetails,
@@ -17,12 +21,6 @@ import {
 } from "@/lib/leadStore";
 
 export const runtime = "nodejs";
-
-function isAuthorized(request: Request) {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) return process.env.NODE_ENV !== "production";
-  return request.headers.get("x-admin-key") === adminPassword;
-}
 
 function adminJson(data: unknown, init?: ResponseInit) {
   const response = NextResponse.json(data, init);
@@ -37,10 +35,19 @@ function unauthorized() {
 }
 
 export async function GET(request: Request) {
-  if (!isAuthorized(request)) return unauthorized();
+  const session = authenticateAdmin(request);
+  if (!session.authorized) return unauthorized();
 
   const { searchParams } = new URL(request.url);
   const leadId = searchParams.get("leadId");
+
+  if (searchParams.get("type") === "profile") {
+    return adminJson({ user: session.user, usingMasterPassword: session.usingMasterPassword });
+  }
+
+  if (searchParams.get("type") === "users") {
+    return adminJson({ users: listAdminUsers(), currentUser: session.user, usingMasterPassword: session.usingMasterPassword });
+  }
 
   if (leadId) {
     const lead = getLead(leadId);
@@ -56,11 +63,12 @@ export async function GET(request: Request) {
     return adminJson({ settings: getPublicChatSettings() });
   }
 
-  return adminJson({ leads: listLeads(), statuses: leadStatuses, labels: leadStatusLabels, settings: getPublicChatSettings() });
+  return adminJson({ leads: listLeads(), statuses: leadStatuses, labels: leadStatusLabels, settings: getPublicChatSettings(), currentUser: session.user });
 }
 
 export async function PATCH(request: Request) {
-  if (!isAuthorized(request)) return unauthorized();
+  const session = authenticateAdmin(request);
+  if (!session.authorized) return unauthorized();
 
   const body = await request.json().catch(() => null);
   const leadId = typeof body?.leadId === "string" ? body.leadId : "";
@@ -74,6 +82,37 @@ export async function PATCH(request: Request) {
         clearApiKey: Boolean(body?.clearApiKey)
       })
     });
+  }
+
+  if (action === "create_user") {
+    const username = typeof body?.username === "string" ? body.username.trim().toLowerCase() : "";
+    const password = typeof body?.password === "string" ? body.password.trim() : "";
+    const name = typeof body?.name === "string" ? body.name.trim() : "";
+    const photo = typeof body?.photo === "string" ? body.photo.trim() : "";
+
+    if (!username || !password || !name) {
+      return adminJson({ error: "Usuario, nome e senha sao obrigatorios." }, { status: 400 });
+    }
+
+    try {
+      const user = createAdminUser({ username, password, name, photo });
+      return adminJson({ user, users: listAdminUsers() });
+    } catch {
+      return adminJson({ error: "Nao foi possivel criar o usuario. Verifique se o usuario ja existe." }, { status: 400 });
+    }
+  }
+
+  if (action === "profile") {
+    if (!session.user || session.usingMasterPassword) {
+      return adminJson({ error: "Entre com um usuario criado para editar perfil e senha." }, { status: 400 });
+    }
+
+    const name = typeof body?.name === "string" ? body.name.trim() : undefined;
+    const photo = typeof body?.photo === "string" ? body.photo : undefined;
+    const password = typeof body?.password === "string" ? body.password.trim() : undefined;
+    const user = updateAdminUserProfile(session.user.username, { name, photo, password });
+
+    return adminJson({ user, users: listAdminUsers() });
   }
 
   if (action === "ai") {
