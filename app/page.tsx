@@ -5,6 +5,7 @@ import { CTASection } from "@/components/CTASection";
 import { HeroSection } from "@/components/HeroSection";
 import { ImageFeatureSection } from "@/components/ImageFeatureSection";
 import { MinimalButton } from "@/components/MinimalButton";
+import { PartnersSection } from "@/components/PartnersSection";
 import { ProcessTimeline } from "@/components/ProcessTimeline";
 import { ProductCategoryCard } from "@/components/ProductCategoryCard";
 import { Reveal } from "@/components/Motion";
@@ -113,6 +114,8 @@ export default function HomePage() {
           </div>
         </Reveal>
       </section>
+
+      <PartnersSection />
 
       <CTASection />
     </main>
