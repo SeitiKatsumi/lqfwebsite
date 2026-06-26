@@ -36,6 +36,7 @@ export const conceptImages = {
   hero: "/humanized/home-hero-facial-ok.png",
   manifesto: "/concept/concept-11.png",
   about: "/concept/concept-23.png",
+  facade: "/facade/lqf-fachada.png",
   technology: "/concept/concept-16.png",
   products: "/concept/concept-13.png",
   process: "/concept/concept-20.png",

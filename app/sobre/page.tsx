@@ -31,9 +31,9 @@ export default function SobrePage() {
     <main>
       <HeroSection
         eyebrow="Sobre a LQF"
-        title="A ciência por trás da beleza."
+        title="A nossa estrutura"
         subtitle="Somos uma indústria farmacêutica especializada em transformar ideias, fórmulas e projetos em cosméticos e dermocosméticos prontos para o mercado."
-        image={conceptImages.about}
+        image={conceptImages.facade}
         compact
       />
       <ImageFeatureSection
