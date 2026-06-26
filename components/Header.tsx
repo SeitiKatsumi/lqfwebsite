@@ -22,7 +22,7 @@ export function Header() {
     <header className="fixed left-0 right-0 top-4 z-50 px-4">
       <div className={`mx-auto flex max-w-[1500px] items-center justify-between rounded-full px-4 py-3 transition ${scrolled || open ? "glass-nav" : "bg-white/20 backdrop-blur-md"}`}>
         <Link href="/" className="flex items-center">
-          <Logo compact />
+          <Logo priority />
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-normal text-graphite/72 lg:flex">
