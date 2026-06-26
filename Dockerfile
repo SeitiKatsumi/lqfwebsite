@@ -14,8 +14,14 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 
-FROM nginx:1.27-alpine AS runner
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/out /usr/share/nginx/html
+FROM base AS runner
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
+ENV PORT=80
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["pnpm", "exec", "next", "start", "-p", "80", "-H", "0.0.0.0"]

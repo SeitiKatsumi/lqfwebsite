@@ -2,6 +2,10 @@
 .next
 node_modules
 qa-screenshots
+data
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 npm-debug.log*
 pnpm-debug.log*
 .env*

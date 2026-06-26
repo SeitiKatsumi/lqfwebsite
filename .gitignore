@@ -6,3 +6,7 @@ dist
 !.env.example
 qa-screenshots
 *.tsbuildinfo
+data
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

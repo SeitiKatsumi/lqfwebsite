@@ -38,6 +38,7 @@ export const conceptImages = {
   about: "/concept/concept-23.png",
   facade: "/facade/lqf-fachada.png",
   technology: "/concept/concept-16.png",
+  technologyHero: "/humanized/tecnologia-processo.png",
   products: "/concept/concept-13.png",
   process: "/concept/concept-20.png",
   privateLabel: "/concept/concept-06.png",

@@ -4,6 +4,7 @@ import "@/app/globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/Motion";
+import { IrisAssistant } from "@/components/IrisAssistant";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Header />
         {children}
         <Footer />
+        <IrisAssistant />
       </body>
     </html>
   );

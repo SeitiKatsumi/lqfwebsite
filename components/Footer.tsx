@@ -17,6 +17,9 @@ export function Footer() {
               {item.label}
             </Link>
           ))}
+          <Link href="/politica-de-privacidade" className="transition hover:text-graphite">
+            Política de Privacidade
+          </Link>
         </nav>
         <div className="space-y-4 text-sm text-graphite/62">
           <p className="flex gap-3">
@@ -31,9 +34,14 @@ export function Footer() {
           </p>
           <p className="flex gap-3">
             <Phone className="mt-0.5 h-4 w-4 shrink-0" />
-            <a href="tel:+551732093010" className="transition hover:text-graphite">17 3209-3010</a>
+            <a href="tel:+551732093010" className="transition hover:text-graphite">
+              17 3209-3010
+            </a>
           </p>
-          <p className="flex gap-3"><Mail className="mt-0.5 h-4 w-4 shrink-0" /> contato@lqf.com.br</p>
+          <p className="flex gap-3">
+            <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+            contato@lqf.com.br
+          </p>
           <div className="flex items-center gap-3 pt-2">
             <a
               href="https://www.facebook.com/GrupoLQF/"
@@ -57,7 +65,12 @@ export function Footer() {
         </div>
       </div>
       <div className="section-shell border-t border-graphite/10 py-6 text-xs text-graphite/45">
-        © {new Date().getFullYear()} LQF Farmacêutica. Todos os direitos reservados.
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span>© {new Date().getFullYear()} LQF Farmacêutica. Todos os direitos reservados.</span>
+          <Link href="/politica-de-privacidade" className="transition hover:text-graphite">
+            Política de Privacidade
+          </Link>
+        </div>
       </div>
     </footer>
   );

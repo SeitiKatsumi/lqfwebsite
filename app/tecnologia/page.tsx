@@ -25,7 +25,7 @@ export default function TecnologiaPage() {
         eyebrow="Tecnologia"
         title="Tecnologia aplicada à precisão industrial."
         subtitle="Processos controlados, ambientes adequados, laboratórios equipados e sistemas de qualidade para desenvolver e fabricar produtos com segurança e consistência."
-        image={conceptImages.technology}
+        image={conceptImages.technologyHero}
         compact
       />
       <EditorialHero
