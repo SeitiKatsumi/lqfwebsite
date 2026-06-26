@@ -22,7 +22,7 @@ export function HeroSection({
     <section className="grain relative overflow-hidden pt-24">
       <div className={`section-shell grid items-center gap-8 py-8 lg:grid-cols-[0.92fr_1.08fr] ${compact ? "min-h-[78svh]" : "min-h-svh"}`}>
         <div className="relative z-10 pb-6">
-          <p className="eyebrow">{eyebrow}</p>
+          {eyebrow && <p className="eyebrow">{eyebrow}</p>}
           <h1 className="display-title mt-7">{title}</h1>
           <p className="body-large mt-8 max-w-2xl">{subtitle}</p>
           <div className="mt-9 flex flex-wrap gap-3">

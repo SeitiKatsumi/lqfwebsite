@@ -2,8 +2,6 @@ import { Reveal } from "@/components/Motion";
 import { SectionTitle } from "@/components/SectionTitle";
 
 const partnerLogos = [
-  "01-01c3aff52f2a4dffa526d7a9843d46ea-d75478da.png",
-  "02-0fdef751204647a3bbd7eaa2827ed4f9-0990f913.png",
   "03-6819dd_030f8e8b9eb84989930fce4cfcb57fd4-mv2-bb4f9d9a.png",
   "04-6819dd_03c2dc31bcf54b06a0616e0d9af597a9-mv2-71855f9b.png",
   "05-6819dd_1c6e0c8976e64b8ebfc6eaa3b8e04518-mv2-e8e34f7e.png",
@@ -56,7 +54,6 @@ const partnerLogos = [
   "52-6819dd_f81180bee4c6453ba9dbe44b6bf92b36-mv2-de13aded.png",
   "53-6819dd_f8aabe6b1f7e4102a539e4d3bba98481-mv2-24bc63d3.png",
   "54-6819dd_f93476ba172e4513bc7d2ce592638551-mv2-bccc84ea.png",
-  "55-6819dd_fa436d24b6574cbc92d64ad42c3a6af9-mv2-7cd3d044.png",
   "56-6819dd_fad08e174ae646d19f25cbbc301b5de2-mv2-a96ecabc.jpg",
   "57-6819dd_fd021f5d55ad4a6980c5af4f1a2d2c88-mv2-b3d6ab79.png"
 ];
@@ -72,18 +69,18 @@ export function PartnersSection() {
             text="A presença da LQF em diferentes projetos e parcerias reforça uma atuação baseada em consistência, responsabilidade produtiva e capacidade de transformar estratégia em produto acabado."
           />
         </div>
-        <Reveal className="rounded-[2rem] border border-graphite/10 bg-white/72 p-3 md:p-5">
+        <Reveal className="rounded-[2rem] border border-graphite/10 bg-white p-3 md:p-5">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
             {partnerLogos.map((logo, index) => (
               <div
                 key={logo}
-                className="group grid h-28 place-items-center rounded-2xl border border-graphite/[0.06] bg-porcelain/58 p-5 transition hover:-translate-y-0.5 hover:border-graphite/14 hover:bg-white hover:shadow-soft"
+                className="group grid h-28 place-items-center rounded-2xl border border-graphite/[0.06] bg-white p-5 transition hover:-translate-y-0.5 hover:border-graphite/14 hover:shadow-soft"
               >
                 <img
                   src={`/partners/${logo}`}
                   alt={`Logo parceiro ${index + 1}`}
                   loading="lazy"
-                  className="max-h-14 max-w-full object-contain opacity-50 grayscale saturate-0 contrast-75 transition duration-500 group-hover:opacity-100 group-hover:grayscale-0 group-hover:saturate-100 group-hover:contrast-100"
+                  className="max-h-14 max-w-full object-contain opacity-50 grayscale saturate-0 contrast-75 mix-blend-multiply transition duration-500 group-hover:opacity-100 group-hover:grayscale-0 group-hover:saturate-100 group-hover:contrast-100"
                 />
               </div>
             ))}

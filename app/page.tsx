@@ -18,7 +18,7 @@ export default function HomePage() {
   return (
     <main>
       <HeroSection
-        eyebrow="LQF Farmacêutica"
+        eyebrow=""
         title="A ciência por trás da beleza."
         subtitle="A LQF Farmacêutica desenvolve, regulariza e fabrica cosméticos e dermocosméticos para marcas que buscam qualidade, segurança e alto padrão técnico."
         image={placeholders[0]}
