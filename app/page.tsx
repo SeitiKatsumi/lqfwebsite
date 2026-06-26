@@ -11,7 +11,7 @@ import { ProcessTimeline } from "@/components/ProcessTimeline";
 import { ProductCategoryCard } from "@/components/ProductCategoryCard";
 import { Reveal } from "@/components/Motion";
 import { SectionTitle } from "@/components/SectionTitle";
-import { authorityPillars, conceptImages, pageMeta, productCategories, qualityItems, technologyItems } from "@/lib/site";
+import { authorityPillars, chemicalImages, conceptImages, pageMeta, productCategories, qualityItems, technologyItems } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta.home;
 
@@ -40,10 +40,10 @@ export default function HomePage() {
       </section>
 
       <EditorialHero
-        eyebrow="Presenca de marca"
-        title="Produtos que chegam ao mercado com aparencia de linha pronta."
-        text="Da formula ao acabamento visual, cada projeto precisa sustentar desejo, credibilidade e padrao tecnico desde o primeiro lote."
-        image={conceptImages.editorialA}
+        eyebrow="Ciência aplicada"
+        title="A ciência por trás da beleza."
+        text="Desenvolvimento, regularização e fabricação com padrão técnico para transformar fórmulas em produtos seguros, consistentes e desejáveis."
+        image={chemicalImages.science}
       />
 
       <section className="section-shell py-16 md:py-28">
@@ -107,10 +107,10 @@ export default function HomePage() {
       />
 
       <EditorialHero
-        eyebrow="Qualidade visual e tecnica"
-        title="Sofisticacao tambem esta no controle."
-        text="A apresentacao do produto nasce junto com o rigor do processo: pesquisa, testes, embalagem, rastreabilidade e acabamento pensados como uma unica entrega."
-        image={conceptImages.quality}
+        eyebrow="Controle de qualidade"
+        title="Qualidade em cada etapa."
+        text="Do desenvolvimento à liberação final, cada produto passa por processos técnicos, análises e validações que sustentam segurança e consistência."
+        image={chemicalImages.quality}
         align="right"
       />
 

@@ -4,7 +4,7 @@ import { EditorialHero } from "@/components/EditorialHero";
 import { HeroSection } from "@/components/HeroSection";
 import { ProductCategoryCard } from "@/components/ProductCategoryCard";
 import { SectionTitle } from "@/components/SectionTitle";
-import { conceptImages, pageMeta, productCategories } from "@/lib/site";
+import { chemicalImages, conceptImages, pageMeta, productCategories } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta.produtos;
 
@@ -19,10 +19,10 @@ export default function ProdutosPage() {
         compact
       />
       <EditorialHero
-        eyebrow="Arquitetura de linha"
-        title="Categorias com presenca visual desde a primeira apresentacao."
-        text="A leitura da linha precisa ser imediata: capilar, facial, corporal, infantil, materna ou sob demanda, cada categoria ganha uma imagem propria para sustentar posicionamento."
-        image={conceptImages.packaging}
+        eyebrow="Desenvolvimento técnico"
+        title="Linhas pensadas da fórmula ao produto final."
+        text="Capilar, facial, corporal, infantil, materna ou sob demanda: cada categoria nasce com sensorialidade, performance e viabilidade produtiva."
+        image={chemicalImages.development}
       />
       <section className="section-shell py-16 md:py-28">
         <SectionTitle

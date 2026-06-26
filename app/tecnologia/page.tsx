@@ -5,7 +5,7 @@ import { EditorialHero } from "@/components/EditorialHero";
 import { HeroSection } from "@/components/HeroSection";
 import { ImageFeatureSection } from "@/components/ImageFeatureSection";
 import { SectionTitle } from "@/components/SectionTitle";
-import { conceptImages, pageMeta, technologyItems } from "@/lib/site";
+import { chemicalImages, conceptImages, pageMeta, technologyItems } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta.tecnologia;
 
@@ -29,10 +29,10 @@ export default function TecnologiaPage() {
         compact
       />
       <EditorialHero
-        eyebrow="Precisao industrial"
-        title="Tecnica, acabamento e controle no mesmo padrao."
-        text="A estrutura produtiva sustenta tanto a seguranca do processo quanto a percepcao de valor que a marca entrega no ponto de contato com o consumidor."
-        image={conceptImages.editorialB}
+        eyebrow="Tecnologia e qualidade"
+        title="Precisão técnica para fabricar com segurança."
+        text="Ambientes controlados, processos documentados e análises estruturadas sustentam o padrão farmacêutico da LQF."
+        image={chemicalImages.precision}
         align="right"
       />
       <section className="section-shell py-16 md:py-28">

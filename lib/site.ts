@@ -48,6 +48,13 @@ export const conceptImages = {
   editorialB: "/concept/concept-24.png"
 };
 
+export const chemicalImages = {
+  science: "/chemical/chemical-01.png",
+  quality: "/chemical/chemical-02.png",
+  development: "/chemical/chemical-03.png",
+  precision: "/chemical/chemical-04.png"
+};
+
 export const lineImages = {
   capilar: "/lines/capilar.png",
   facial: "/lines/facial.png",

@@ -20,11 +20,11 @@ export function EditorialHero({
         <Image src={image} alt="" fill sizes="100vw" className="object-cover brightness-[0.72]" />
         <div className="absolute inset-0 bg-graphite/24" />
         <div className={`absolute inset-0 ${align === "right" ? "bg-gradient-to-l" : "bg-gradient-to-r"} from-graphite/88 via-graphite/58 to-graphite/20`} />
-        <div className={`absolute inset-0 flex items-end px-5 pb-8 pt-24 md:px-12 md:pb-12 md:pt-28 ${align === "right" ? "justify-end text-right" : ""}`}>
+        <div className={`absolute inset-0 flex items-end px-5 pb-12 pt-24 md:px-12 md:pb-12 md:pt-28 ${align === "right" ? "justify-end text-right" : ""}`}>
           <div className="max-w-2xl">
             <p className="eyebrow !text-white/75">{eyebrow}</p>
-            <h2 className="mt-4 text-[clamp(2rem,4.2vw,4.8rem)] font-light leading-[0.98] !text-white">{title}</h2>
-            <p className={`mt-6 max-w-xl text-sm leading-7 !text-white/80 md:text-base md:leading-8 ${align === "right" ? "ml-auto" : ""}`}>{text}</p>
+            <h2 className="mt-4 text-[clamp(1.85rem,4.2vw,4.8rem)] font-light leading-[1] !text-white">{title}</h2>
+            <p className={`mt-5 max-w-xl text-[0.82rem] font-light leading-6 !text-white/80 md:mt-6 md:text-base md:leading-8 ${align === "right" ? "ml-auto" : ""}`}>{text}</p>
           </div>
         </div>
       </Reveal>

@@ -16,7 +16,12 @@ export function Logo({
       height={isHorizontal ? 155 : 610}
       priority={priority}
       sizes={isHorizontal ? "(max-width: 768px) 120px, 210px" : "(max-width: 768px) 180px, 240px"}
-      className={isHorizontal ? "h-auto w-[116px] sm:w-[168px] lg:w-[210px]" : "h-auto w-[180px] sm:w-[220px]"}
+      className="block"
+      style={{
+        width: isHorizontal ? "clamp(116px, 12vw, 210px)" : "clamp(180px, 20vw, 220px)",
+        maxWidth: "100%",
+        height: "auto"
+      }}
     />
   );
 }
