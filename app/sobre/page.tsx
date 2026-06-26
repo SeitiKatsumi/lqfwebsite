@@ -5,6 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { ImageFeatureSection } from "@/components/ImageFeatureSection";
 import { Reveal } from "@/components/Motion";
 import { SectionTitle } from "@/components/SectionTitle";
+import { StructureCarousel } from "@/components/StructureCarousel";
 import { conceptImages, differentials, pageMeta } from "@/lib/site";
 import { CheckCircle2 } from "lucide-react";
 
@@ -58,6 +59,7 @@ export default function SobrePage() {
           <CardGrid items={differentials.map((title) => ({ title, text: "Estrutura técnica para desenvolvimento, fabricação e controle com padrão farmacêutico.", icon: CheckCircle2 }))} />
         </div>
       </section>
+      <StructureCarousel />
       <CTASection />
     </main>
   );
