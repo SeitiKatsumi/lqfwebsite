@@ -33,7 +33,7 @@ export const placeholders = [
 ];
 
 export const conceptImages = {
-  hero: "/concept/concept-09.png",
+  hero: "/humanized/home-hero-facial.png",
   manifesto: "/concept/concept-11.png",
   about: "/concept/concept-23.png",
   technology: "/concept/concept-16.png",

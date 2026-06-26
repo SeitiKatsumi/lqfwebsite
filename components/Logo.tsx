@@ -18,7 +18,7 @@ export function Logo({
       sizes={isHorizontal ? "(max-width: 768px) 120px, 210px" : "(max-width: 768px) 180px, 240px"}
       className="block"
       style={{
-        width: isHorizontal ? "clamp(116px, 12vw, 210px)" : "clamp(180px, 20vw, 220px)",
+        width: isHorizontal ? "clamp(154px, 12vw, 210px)" : "clamp(180px, 20vw, 220px)",
         maxWidth: "100%",
         height: "auto"
       }}
