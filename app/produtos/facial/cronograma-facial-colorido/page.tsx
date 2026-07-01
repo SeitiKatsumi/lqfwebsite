@@ -222,6 +222,24 @@ export default function CronogramaFacialColoridoPage() {
         </div>
       </section>
 
+      <section className="section-shell py-14 md:py-20">
+        <Reveal className="overflow-hidden rounded-[2rem] border border-graphite/10 bg-white p-3 shadow-soft md:p-4">
+          <div className="relative aspect-video overflow-hidden rounded-[1.5rem] bg-graphite">
+            <video
+              className="h-full w-full object-cover"
+              controls
+              playsInline
+              preload="metadata"
+              poster={`${basePath}/hero-colors.jpg`}
+              aria-label="Vídeo Cronograma Facial Colorido"
+            >
+              <source src={`${basePath}/cronograma-facial-colorido-16-9.mp4`} type="video/mp4" />
+              Seu navegador não suporta reprodução de vídeo.
+            </video>
+          </div>
+        </Reveal>
+      </section>
+
       <section className="section-shell py-20 md:py-32">
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           <SectionTitle
