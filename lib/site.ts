@@ -15,11 +15,33 @@ import {
   Waves
 } from "lucide-react";
 
-export const navItems = [
+export type NavItem = {
+  href: string;
+  label: string;
+  children?: NavItem[];
+};
+
+export const navItems: NavItem[] = [
   { href: "/", label: "Início" },
   { href: "/sobre", label: "Sobre" },
   { href: "/tecnologia", label: "Tecnologia" },
-  { href: "/produtos", label: "Produtos" },
+  {
+    href: "/produtos",
+    label: "Produtos",
+    children: [
+      {
+        href: "/produtos#facial",
+        label: "Facial",
+        children: [{ href: "/produtos/facial/cronograma-facial-colorido", label: "Cronograma Facial Colorido" }]
+      },
+      { href: "/produtos#corporal", label: "Corporal" },
+      { href: "/produtos#capilar", label: "Capilar" },
+      { href: "/produtos#maos-e-pes", label: "Mãos e pés" },
+      { href: "/produtos#unhas", label: "Unhas" },
+      { href: "/produtos#bebe-e-infantil", label: "Bebê e Infantil" },
+      { href: "/produtos#linha-materna", label: "Linha Materna" }
+    ]
+  },
   { href: "/#partners", label: "Partners" },
   { href: "/processo", label: "Processo LQF" },
   { href: "/private-label", label: "Private Label" },
@@ -103,41 +125,49 @@ export const technologyItems = [
 
 export const productCategories = [
   {
+    slug: "capilar",
     title: "Linha Capilar",
     text: "Tratamento do couro cabeludo, reconstrução, manutenção, finalização, matização, cachos e transformação capilar.",
     image: lineImages.capilar
   },
   {
+    slug: "facial",
     title: "Linha Facial",
     text: "Limpeza, tratamento, renovação, hidratação, proteção, uniformização e acabamento da pele.",
     image: lineImages.facial
   },
   {
+    slug: "corporal",
     title: "Linha Corporal",
     text: "Hidratação, cuidado diário, tratamento estético, perfumação e bem-estar.",
     image: lineImages.corporal
   },
   {
+    slug: "maos-e-pes",
     title: "Mãos e Pés",
     text: "Hidratação, conforto, proteção, cuidado específico, controle de odores e tratamento.",
     image: lineImages.maosEPes
   },
   {
+    slug: "unhas",
     title: "Unhas",
     text: "Esmaltação, bases, removedores, acabamento, tratamento e preparação das unhas.",
     image: lineImages.unhas
   },
   {
+    slug: "bebe-e-infantil",
     title: "Bebê e Infantil",
     text: "Cuidado da pele e cabelos de bebês e crianças, com suavidade, segurança e sensorialidade.",
     image: lineImages.bebeInfantil
   },
   {
+    slug: "linha-materna",
     title: "Linha Materna",
     text: "Cuidado da pele durante a maternidade, com foco em hidratação, proteção e bem-estar.",
     image: lineImages.materna
   },
   {
+    slug: "sob-demanda",
     title: "Sob demanda",
     text: "Formulações criadas ou adaptadas conforme estratégia, performance, requisitos regulatórios e viabilidade produtiva.",
     image: conceptImages.demand
@@ -230,6 +260,11 @@ export const pageMeta = {
     title: "Produtos e Categorias | LQF Farmacêutica",
     description:
       "Desenvolvimento e fabricação de linhas capilares, faciais, corporais, infantis, maternas, unhas, mãos e pés e produtos sob demanda."
+  },
+  cronogramaFacialColorido: {
+    title: "Cronograma Facial Colorido | LQF Farmacêutica",
+    description:
+      "Linha conceitual de cronograma facial guiado por cores para marcas que buscam rotina intuitiva, experiência de prateleira e desenvolvimento terceirizado com padrão LQF."
   },
   processo: {
     title: "Processo LQF | Da ideia ao produto pronto para o mercado",

@@ -31,7 +31,11 @@ export default function ProdutosPage() {
           text="Cada categoria pode ser desenvolvida com sensorialidade, performance, embalagem e requisitos técnicos alinhados à estratégia da marca."
         />
         <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {productCategories.map((item, index) => <ProductCategoryCard key={item.title} {...item} index={index} />)}
+          {productCategories.map((item, index) => (
+            <div key={item.title} id={item.slug} className="scroll-mt-32">
+              <ProductCategoryCard title={item.title} text={item.text} image={item.image} index={index} />
+            </div>
+          ))}
         </div>
       </section>
       <CTASection />
