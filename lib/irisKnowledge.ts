@@ -11,6 +11,14 @@ import {
   technologyItems
 } from "@/lib/site";
 
+const renderNavItems = (items: typeof navItems, level = 0): string =>
+  items
+    .flatMap((item) => [
+      `${"  ".repeat(level)}- ${item.label}: ${item.href}`,
+      ...(item.children?.length ? [renderNavItems(item.children, level + 1)] : [])
+    ])
+    .join("\n");
+
 const siteContext = `
 Conteúdo institucional do site LQF:
 
@@ -20,7 +28,7 @@ Proposta central:
 - Atua com desenvolvimento sob demanda, fabricação terceirizada, regularização, controle de qualidade e private label.
 
 Páginas e navegação:
-${navItems.map((item) => `- ${item.label}: ${item.href}`).join("\n")}
+${renderNavItems(navItems)}
 
 Resumo das páginas:
 ${Object.values(pageMeta)
@@ -32,6 +40,10 @@ ${authorityPillars.map((item) => `- ${item.title}: ${item.text}`).join("\n")}
 
 Categorias de produtos:
 ${productCategories.map((item) => `- ${item.title}: ${item.text}`).join("\n")}
+
+Linhas especiais:
+- Cronograma Facial Colorido: linha facial guiada por cores para rotina intuitiva, memorável, gamificada e com presença de prateleira.
+- Body Splash Funcional: linha corporal sem álcool que combina fragrância e ativos cosméticos. Versões: Hidratação com ácido hialurônico, Nutrição com niacinamida, Reparador com colágeno vegetal, Calmante e Suavizante com calêndula, camomila, romã, aloe vera e pantenol, e Tonificante com extrato de coffea.
 
 Processo LQF:
 ${processSteps.map((item, index) => `${index + 1}. ${item.title}: ${item.text}`).join("\n")}

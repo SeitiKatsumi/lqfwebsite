@@ -7,6 +7,10 @@ import { Reveal } from "@/components/Motion";
 import { SectionTitle } from "@/components/SectionTitle";
 
 const structureNumbers = [
+  "39",
+  "40",
+  "41",
+  "42",
   "03",
   "04",
   "05",

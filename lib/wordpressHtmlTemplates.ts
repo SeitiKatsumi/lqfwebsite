@@ -5,6 +5,7 @@ export const wordpressPages = [
   { slug: "sobre", label: "Sobre", url: "/sobre", title: pageMeta.sobre.title, description: pageMeta.sobre.description },
   { slug: "tecnologia", label: "Tecnologia", url: "/tecnologia", title: pageMeta.tecnologia.title, description: pageMeta.tecnologia.description },
   { slug: "produtos", label: "Produtos", url: "/produtos", title: pageMeta.produtos.title, description: pageMeta.produtos.description },
+  { slug: "body-splash-funcional", label: "Body Splash Funcional", url: "/produtos/corporal/body-splash-funcional", title: pageMeta.bodySplashFuncional.title, description: pageMeta.bodySplashFuncional.description },
   { slug: "processo", label: "Processo LQF", url: "/processo", title: pageMeta.processo.title, description: pageMeta.processo.description },
   { slug: "private-label", label: "Private Label", url: "/private-label", title: pageMeta.privateLabel.title, description: pageMeta.privateLabel.description },
   { slug: "contato", label: "Contato", url: "/contato", title: pageMeta.contato.title, description: pageMeta.contato.description }

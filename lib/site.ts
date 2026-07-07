@@ -34,7 +34,11 @@ export const navItems: NavItem[] = [
         label: "Facial",
         children: [{ href: "/produtos/facial/cronograma-facial-colorido", label: "Cronograma Facial Colorido" }]
       },
-      { href: "/produtos#corporal", label: "Corporal" },
+      {
+        href: "/produtos#corporal",
+        label: "Corporal",
+        children: [{ href: "/produtos/corporal/body-splash-funcional", label: "Body Splash Funcional" }]
+      },
       { href: "/produtos#capilar", label: "Capilar" },
       { href: "/produtos#maos-e-pes", label: "Mãos e pés" },
       { href: "/produtos#unhas", label: "Unhas" },
@@ -265,6 +269,11 @@ export const pageMeta = {
     title: "Cronograma Facial Colorido | LQF Farmacêutica",
     description:
       "Linha conceitual de cronograma facial guiado por cores para marcas que buscam rotina intuitiva, experiência de prateleira e desenvolvimento terceirizado com padrão LQF."
+  },
+  bodySplashFuncional: {
+    title: "Body Splash Funcional | LQF Farmacêutica",
+    description:
+      "Linha conceitual de body splash sem álcool com fragrâncias e ativos cosméticos para hidratar, nutrir, reparar, suavizar e tonificar a pele."
   },
   processo: {
     title: "Processo LQF | Da ideia ao produto pronto para o mercado",
