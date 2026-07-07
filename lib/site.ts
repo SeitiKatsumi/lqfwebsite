@@ -37,7 +37,13 @@ export const navItems: NavItem[] = [
       {
         href: "/produtos#corporal",
         label: "Corporal",
-        children: [{ href: "/produtos/corporal/body-splash-funcional", label: "Body Splash Funcional" }]
+        children: [
+          { href: "/produtos/corporal/body-splash-funcional", label: "Body Splash Funcional" },
+          { href: "/produtos/corporal/cases-de-sucesso", label: "Cases de Sucesso" },
+          { href: "/produtos/corporal/body-care-sensorial", label: "Body Care Sensorial" },
+          { href: "/produtos/corporal/desodorante-rollon", label: "Desodorante Roll-on" },
+          { href: "/produtos/corporal/dermocorporais-skinificacao", label: "Dermocorporais - Skinificação" }
+        ]
       },
       { href: "/produtos#capilar", label: "Capilar" },
       { href: "/produtos#maos-e-pes", label: "Mãos e pés" },
@@ -274,6 +280,26 @@ export const pageMeta = {
     title: "Body Splash Funcional | LQF Farmacêutica",
     description:
       "Linha conceitual de body splash sem álcool com fragrâncias e ativos cosméticos para hidratar, nutrir, reparar, suavizar e tonificar a pele."
+  },
+  casesCuidadoCorporal: {
+    title: "Cases de Sucesso em Cuidado Corporal | LQF Farmacêutica",
+    description:
+      "Estudo estratégico de oportunidades em cuidado corporal com categorias de alta procura, ativos funcionais, sensorial ideal e arquitetura de linha para marcas de cosméticos."
+  },
+  bodyCareSensorial: {
+    title: "Linha Body Care Sensorial | LQF Farmacêutica",
+    description:
+      "Portfólio premium de coleções corporais sensoriais para marcas que desejam inovar com glow effect, skinificação corporal, perfumação funcional e bioativos de alta performance."
+  },
+  desodoranteRollon: {
+    title: "Desodorante Roll-on com Ação Uniformizadora da Pele | LQF Farmacêutica",
+    description:
+      "Desodorante roll-on sem álcool etílico com proposta uniformizadora, niacinamida, óleo de rosa mosqueta, proteção contra odores e sensorial confortável."
+  },
+  dermocorporaisSkinificacao: {
+    title: "Dermocorporais | Skinificação do Corpo com Séruns de Alta Performance",
+    description:
+      "Linha dermocorporal de séruns para skinificação do corpo, com niacinamida, ácido hialurônico, colágeno vegetal, ureia, lipoproteínas, óleos vegetais e hidratação inteligente."
   },
   processo: {
     title: "Processo LQF | Da ideia ao produto pronto para o mercado",

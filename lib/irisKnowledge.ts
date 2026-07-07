@@ -44,6 +44,10 @@ ${productCategories.map((item) => `- ${item.title}: ${item.text}`).join("\n")}
 Linhas especiais:
 - Cronograma Facial Colorido: linha facial guiada por cores para rotina intuitiva, memorável, gamificada e com presença de prateleira.
 - Body Splash Funcional: linha corporal sem álcool que combina fragrância e ativos cosméticos. Versões: Hidratação com ácido hialurônico, Nutrição com niacinamida, Reparador com colágeno vegetal, Calmante e Suavizante com calêndula, camomila, romã, aloe vera e pantenol, e Tonificante com extrato de coffea.
+- Cases de Sucesso em Cuidado Corporal: estudo estratégico de oportunidades corporais com categorias de alta procura, como hidratante para pele seca, creme multifuncional, óleo de banho emulsionável, multirrestaurador, restaurador corporal, dermocalmante, regenerador labial, loção multirreparadora, óleo biorestaurador e creme preventivo de assaduras. Usa benchmarks apenas como referência interna e não cita marcas concorrentes na copy pública.
+- Body Care Sensorial: plataforma B2B de coleções corporais com glow effect, skinificação corporal, perfumação funcional, sensorial gourmand, ingredientes naturais, bioativos e tropicalização da beleza brasileira.
+- Desodorante Roll-on Uniformizador: conceito de roll-on sem álcool etílico para axilas com niacinamida, óleo de rosa mosqueta, base cremosa confortável, proteção contra odores e linguagem de aparência mais uniforme, sempre com claims cosméticos seguros e validação para promessas específicas.
+- Dermocorporais – Skinificação do Corpo: linha de séruns corporais de alta performance que leva a lógica do skincare facial ao cuidado corporal, com versões de niacinamida, ácido hialurônico, colágeno vegetal, ureia e lipoproteínas para hidratação inteligente, barreira cutânea, textura, firmeza, uniformização e conforto.
 
 Processo LQF:
 ${processSteps.map((item, index) => `${index + 1}. ${item.title}: ${item.text}`).join("\n")}

@@ -6,6 +6,10 @@ export const wordpressPages = [
   { slug: "tecnologia", label: "Tecnologia", url: "/tecnologia", title: pageMeta.tecnologia.title, description: pageMeta.tecnologia.description },
   { slug: "produtos", label: "Produtos", url: "/produtos", title: pageMeta.produtos.title, description: pageMeta.produtos.description },
   { slug: "body-splash-funcional", label: "Body Splash Funcional", url: "/produtos/corporal/body-splash-funcional", title: pageMeta.bodySplashFuncional.title, description: pageMeta.bodySplashFuncional.description },
+  { slug: "cases-cuidado-corporal", label: "Cases de Sucesso em Cuidado Corporal", url: "/produtos/corporal/cases-de-sucesso", title: pageMeta.casesCuidadoCorporal.title, description: pageMeta.casesCuidadoCorporal.description },
+  { slug: "body-care-sensorial", label: "Body Care Sensorial", url: "/produtos/corporal/body-care-sensorial", title: pageMeta.bodyCareSensorial.title, description: pageMeta.bodyCareSensorial.description },
+  { slug: "desodorante-rollon", label: "Desodorante Roll-on", url: "/produtos/corporal/desodorante-rollon", title: pageMeta.desodoranteRollon.title, description: pageMeta.desodoranteRollon.description },
+  { slug: "dermocorporais-skinificacao", label: "Dermocorporais - Skinificação", url: "/produtos/corporal/dermocorporais-skinificacao", title: pageMeta.dermocorporaisSkinificacao.title, description: pageMeta.dermocorporaisSkinificacao.description },
   { slug: "processo", label: "Processo LQF", url: "/processo", title: pageMeta.processo.title, description: pageMeta.processo.description },
   { slug: "private-label", label: "Private Label", url: "/private-label", title: pageMeta.privateLabel.title, description: pageMeta.privateLabel.description },
   { slug: "contato", label: "Contato", url: "/contato", title: pageMeta.contato.title, description: pageMeta.contato.description }
