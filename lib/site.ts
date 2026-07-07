@@ -32,7 +32,17 @@ export const navItems: NavItem[] = [
       {
         href: "/produtos#facial",
         label: "Facial",
-        children: [{ href: "/produtos/facial/cronograma-facial-colorido", label: "Cronograma Facial Colorido" }]
+        children: [
+          { href: "/produtos/facial/cronograma-facial-colorido", label: "Cronograma Facial Colorido" },
+          { href: "/produtos/facial/expossoma", label: "Expossoma" },
+          { href: "/produtos/facial/cremes-cuidados-especiais", label: "Cremes Cuidados Especiais" },
+          { href: "/produtos/facial/higienizacao-pele", label: "Produtos para Higienizar a Pele" },
+          { href: "/produtos/facial/geleias-faciais-coloridas", label: "Geleias Faciais Coloridas" },
+          { href: "/produtos/facial/make-performance", label: "Linha Make Performance" },
+          { href: "/produtos/facial/sensitive-balance", label: "Sensitive Balance" },
+          { href: "/produtos/facial/seruns-ciclo-completo", label: "Séruns Ciclo Completo" },
+          { href: "/produtos/facial/skinimalismo", label: "Skinimalismo" }
+        ]
       },
       {
         href: "/produtos#corporal",
@@ -275,6 +285,46 @@ export const pageMeta = {
     title: "Cronograma Facial Colorido | LQF Farmacêutica",
     description:
       "Linha conceitual de cronograma facial guiado por cores para marcas que buscam rotina intuitiva, experiência de prateleira e desenvolvimento terceirizado com padrão LQF."
+  },
+  escudoExpossoma: {
+    title: "Linha Escudo Expossoma | LQF Farmacêutica",
+    description:
+      "Linha dermocosmética e capilar inspirada no expossoma para ajudar a proteger pele e cabelos dos efeitos visíveis de estressores ambientais, com tecnologia antipoluição, hidratação e sensorial premium."
+  },
+  cremesCuidadosEspeciais: {
+    title: "Cremes para Cuidados Especiais da Pele | LQF Farmacêutica",
+    description:
+      "Coleção de cremes faciais com retinol, ácido salicílico, ácido hialurônico, ácido glicólico, arbutin, ácido tranexâmico, vitamina C e niacinamida para necessidades específicas da pele."
+  },
+  higienizacaoPele: {
+    title: "Produtos para Higienizar a Pele | Sabonetes Faciais e Águas Micelares",
+    description:
+      "Linha de higienização facial com sabonete limpeza intensiva, primer make up, demaquilante micelar, ácido glicólico 10%, esfoliante anticravos, água micelar hidratante e água micelar detox."
+  },
+  geleiasFaciaisColoridas: {
+    title: "Geleias Faciais Coloridas | LQF Farmacêutica",
+    description:
+      "Linha de geleias faciais em gel glicerinado, oil free e inspiração K-beauty, com complexo de arroz e cores funcionais para uniformização visual, firmeza, hidratação e antioleosidade."
+  },
+  makePerformance: {
+    title: "Linha Make Performance | Makeup Care LQF Farmacêutica",
+    description:
+      "Plataforma Makeup Care que une skincare e maquiagem com produtos para remover, tratar, preparar, iluminar, proteger, fixar e blindar a maquiagem."
+  },
+  sensitiveBalance: {
+    title: "Sensitive Balance | Cuidados para Pele Sensível, Barreira Cutânea e Conforto",
+    description:
+      "Sensitive Balance é uma linha dermocosmética para peles sensíveis, com gel de limpeza, sérum barreira, bruma calmante, gel creme SOS, loção noturna, creme para mãos e gel pós-sol."
+  },
+  serunsCicloCompleto: {
+    title: "Linha Séruns Ciclo Completo | Séruns Faciais de Alta Performance",
+    description:
+      "Linha Séruns Ciclo Completo com ácido hialurônico, resveratrol, tranexâmico, niacinamida, glicólico, retinol, vitamina E, salicílico, zinco, peptídeos e hidratação essencial."
+  },
+  skinimalismo: {
+    title: "Skinimalismo | Ritual Skincare Reduzido",
+    description:
+      "Landing page Skinimalismo com rotina reduzida de skincare para dia e noite, limpeza intensiva, hidratação facial diurna, filtro solar FPS 30, água micelar hidratante e creme facial noturno."
   },
   bodySplashFuncional: {
     title: "Body Splash Funcional | LQF Farmacêutica",
