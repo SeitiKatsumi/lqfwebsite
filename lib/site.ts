@@ -27,7 +27,7 @@ export const navItems: NavItem[] = [
   { href: "/tecnologia", label: "Tecnologia" },
   {
     href: "/produtos",
-    label: "Produtos",
+    label: "Inovações",
     children: [
       {
         href: "/produtos#facial",
@@ -41,7 +41,9 @@ export const navItems: NavItem[] = [
           { href: "/produtos/facial/make-performance", label: "Linha Make Performance" },
           { href: "/produtos/facial/sensitive-balance", label: "Sensitive Balance" },
           { href: "/produtos/facial/seruns-ciclo-completo", label: "Séruns Ciclo Completo" },
-          { href: "/produtos/facial/skinimalismo", label: "Skinimalismo" }
+          { href: "/produtos/facial/skinimalismo", label: "Skinimalismo" },
+          { href: "/produtos/facial/skincare-pele-acneica", label: "Skincare Pele Acneica" },
+          { href: "/produtos/facial/skincare-pele-madura", label: "Skincare Pele Madura" }
         ]
       },
       {
@@ -55,7 +57,13 @@ export const navItems: NavItem[] = [
           { href: "/produtos/corporal/dermocorporais-skinificacao", label: "Dermocorporais - Skinificação" }
         ]
       },
-      { href: "/produtos#capilar", label: "Capilar" },
+      {
+        href: "/produtos#capilar",
+        label: "Capilar",
+        children: [
+          { href: "/produtos/capilar/linha-capilar-coreana", label: "Linha Capilar Coreana" }
+        ]
+      },
       { href: "/produtos#maos-e-pes", label: "Mãos e pés" },
       { href: "/produtos#unhas", label: "Unhas" },
       { href: "/produtos#bebe-e-infantil", label: "Bebê e Infantil" },
@@ -326,6 +334,16 @@ export const pageMeta = {
     description:
       "Landing page Skinimalismo com rotina reduzida de skincare para dia e noite, limpeza intensiva, hidratação facial diurna, filtro solar FPS 30, água micelar hidratante e creme facial noturno."
   },
+  skincarePeleAcneica: {
+    title: "Skincare para Pele Acneica | Rotina para Oleosidade, Poros e Imperfeições",
+    description:
+      "Linha de skincare para pele oleosa e com tendência à acne, com sabonete limpeza intensiva, sérum ácido salicílico e zinco, água micelar detox, gel hidratante, gel secativo, máscara secativa e FPS 60."
+  },
+  skincarePeleMadura: {
+    title: "Skincare para Pele Madura | Rotina Dia e Noite com Hidratação e Uniformização",
+    description:
+      "Linha de skincare para pele madura com sabonete limpeza intensiva, hidratante facial dia, FPS 60, água micelar hidratante, sérum tranexâmico e niacinamida e creme hidratante noite."
+  },
   bodySplashFuncional: {
     title: "Body Splash Funcional | LQF Farmacêutica",
     description:
@@ -350,6 +368,11 @@ export const pageMeta = {
     title: "Dermocorporais | Skinificação do Corpo com Séruns de Alta Performance",
     description:
       "Linha dermocorporal de séruns para skinificação do corpo, com niacinamida, ácido hialurônico, colágeno vegetal, ureia, lipoproteínas, óleos vegetais e hidratação inteligente."
+  },
+  linhaCapilarCoreana: {
+    title: "Linha Capilar Coreana — Skinificação | Haircare K-beauty LQF Farmacêutica",
+    description:
+      "Linha capilar premium inspirada na K-beauty e na skinificação capilar, com máscara intensiva, kit de hidratação em 3 passos e protocolo de reconstrução em 4 passos."
   },
   processo: {
     title: "Processo LQF | Da ideia ao produto pronto para o mercado",
