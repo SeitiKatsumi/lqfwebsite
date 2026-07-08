@@ -32,7 +32,29 @@ const showRegulatoryNotes = true;
 const showB2BPositioning = true;
 const showScientificDetails = true;
 const showClinicalClaims = true;
-const image = "/products/escudo-expossoma/escudo-placeholder.jpg";
+const fallbackImage = "/products/escudo-expossoma/escudo-placeholder.jpg";
+const imageMap: Record<string, string> = {
+  "IMG-HERO-ESCUDO-EXPOSSOMA": "/products/escudo-expossoma/hero-escudo-expossoma.jpg",
+  "IMG-CONCEITO-EXPOSSOMA": "/products/escudo-expossoma/conceito-expossoma.jpg",
+  "IMG-EXPOSSOMA-PELE": "/products/escudo-expossoma/expossoma-pele.jpg",
+  "IMG-TECNOLOGIA-PEPINO-ALGAS": "/products/escudo-expossoma/tecnologia-pepino-algas.jpg",
+  "IMG-FITOSINERGIA-MULTIFACES": "/products/escudo-expossoma/fitosinergia-multifaces.jpg",
+  "IMG-CREME-ESCUDO-FACIAL": "/products/escudo-expossoma/creme-escudo-facial.jpg",
+  "IMG-TEXTURA-GEL-CREME-FACIAL": "/products/escudo-expossoma/textura-gel-creme-facial.jpg",
+  "IMG-CREME-ESCUDO-CORPORAL": "/products/escudo-expossoma/creme-escudo-corporal.jpg",
+  "IMG-CRISTAIS-LIQUIDOS-PELE": "/products/escudo-expossoma/cristais-liquidos-pele.jpg",
+  "IMG-EXPOSSOMA-CABELOS": "/products/escudo-expossoma/expossoma-cabelos.jpg",
+  "IMG-TECNOLOGIA-ESCUDO-CAPILAR": "/products/escudo-expossoma/tecnologia-escudo-capilar.jpg",
+  "IMG-GENGIBRE-ANTIOXIDANTE-CAPILAR": "/products/escudo-expossoma/gengibre-antioxidante-capilar.jpg",
+  "IMG-ALGAS-KAPPAPHYCUS-ESCUDO-CAPILAR": "/products/escudo-expossoma/algas-kappaphycus-escudo-capilar.jpg",
+  "IMG-ALGINATO-SODIO-QUELACAO": "/products/escudo-expossoma/alginato-sodio-quelacao.jpg",
+  "IMG-AMARANTO-PENTEABILIDADE": "/products/escudo-expossoma/amaranto-penteabilidade.jpg",
+  "IMG-SHAMPOO-ESCUDO": "/products/escudo-expossoma/shampoo-escudo.jpg",
+  "IMG-MASCARA-CONDICIONANTE-ESCUDO": "/products/escudo-expossoma/mascara-condicionante-escudo.jpg",
+  "IMG-LEAVE-IN-FINALIZADOR-ESCUDO": "/products/escudo-expossoma/leave-in-finalizador-escudo.jpg",
+  "IMG-ROTINA-COMPLETA-EXPOSSOMA": "/products/escudo-expossoma/rotina-completa-pele-cabelos.jpg",
+  "IMG-CTA-ESCUDO-EXPOSSOMA": "/products/escudo-expossoma/cta-final-escudo-expossoma.jpg"
+};
 
 const anchors = [
   ["O que é expossoma", "#expossoma"],
@@ -99,6 +121,7 @@ const skinProducts = [
     headline: "Gel-creme diário com toque aveludado e filme protetor confortável.",
     text: "Um gel-creme facial para uso diário, ideal para todos os tipos de pele. Sua textura leve entrega hidratação sem pesar, formando um filme protetor confortável com toque aveludado sofisticado.",
     imageLabel: "IMG-CREME-ESCUDO-FACIAL",
+    supportImageLabel: "IMG-TEXTURA-GEL-CREME-FACIAL",
     icon: ScanFace,
     benefits: ["Hidratação leve e confortável.", "Toque aveludado sofisticado.", "Filme protetor sobre a pele.", "Sensação de frescor e suavidade.", "Ajuda a proteger contra os efeitos visíveis do expossoma."],
     indication: "Todos os tipos de pele, rotinas antipoluição, pele exposta à rotina urbana e consumidores que buscam skincare leve e protetor."
@@ -108,6 +131,7 @@ const skinProducts = [
     headline: "Hidratação avançada, toque leve e proteção da barreira cutânea.",
     text: "Um hidratante corporal avançado com base autoemulsionante vegetal, proposta PEG-free, ésteres funcionais e sensorial leve para hidratação, sedosidade e conforto extra.",
     imageLabel: "IMG-CREME-ESCUDO-CORPORAL",
+    supportImageLabel: "IMG-CRISTAIS-LIQUIDOS-PELE",
     icon: Droplets,
     benefits: ["Base autoemulsionante vegetal.", "Formação de cristais líquidos na pele.", "Hidratação profunda e duradoura.", "Redução da perda de água.", "Livre de etoxilados, proposta PEG-free."],
     indication: "Todos os tipos de pele, uso diário e pele corporal exposta ao clima, poluição e ressecamento."
@@ -122,6 +146,7 @@ const hairActives = [
     subtitle: "Antioxidante botânico",
     text: "Rico em compostos bioativos associados à ação antioxidante, ajuda a reduzir o estresse oxidativo e favorece a vitalidade da fibra capilar.",
     benefits: ["Ajuda a reduzir o estresse oxidativo.", "Contribui para aparência de fios mais fortes.", "Auxilia na proteção contra agressões ambientais."],
+    imageLabel: "IMG-GENGIBRE-ANTIOXIDANTE-CAPILAR",
     icon: Leaf
   },
   {
@@ -129,6 +154,7 @@ const hairActives = [
     subtitle: "Revestimento e proteção",
     text: "Ajudam a formar uma película protetora sobre a haste capilar, funcionando como escudo natural contra estressores ambientais.",
     benefits: ["Forma barreira protetora sobre os fios.", "Ajuda a preservar a cutícula.", "Contribui para redução de quebra e pontas duplas."],
+    imageLabel: "IMG-ALGAS-KAPPAPHYCUS-ESCUDO-CAPILAR",
     icon: Waves
   },
   {
@@ -136,6 +162,7 @@ const hairActives = [
     subtitle: "Quelação e revestimento",
     text: "Atua como agente quelante, ajudando a reduzir a interação de metais pesados e poluentes com a fibra capilar.",
     benefits: ["Ajuda a remover resíduos de poluição.", "Contribui para desintoxicação cosmética dos fios.", "Favorece sensação de cabelo mais limpo e leve."],
+    imageLabel: "IMG-ALGINATO-SODIO-QUELACAO",
     icon: FlaskConical
   },
   {
@@ -143,6 +170,7 @@ const hairActives = [
     subtitle: "Penteabilidade e maleabilidade",
     text: "Rico em peptídeos e polissacarídeos, ajuda a melhorar penteabilidade e maleabilidade em cabelos danificados.",
     benefits: ["Melhora a penteabilidade.", "Ajuda a reduzir o atrito ao pentear.", "Promove sensação de maciez."],
+    imageLabel: "IMG-AMARANTO-PENTEABILIDADE",
     icon: Sprout
   }
 ];
@@ -267,10 +295,12 @@ const faqs = [
 ];
 
 function PlaceholderImage({ label, priority = false }: { label: string; priority?: boolean }) {
+  const source = imageMap[label] ?? fallbackImage;
+
   return (
     <div className="group relative h-full min-h-[320px] w-full overflow-hidden rounded-[1.75rem] bg-mist shadow-soft">
       <Image
-        src={image}
+        src={source}
         alt={label}
         fill
         priority={priority}
@@ -278,10 +308,25 @@ function PlaceholderImage({ label, priority = false }: { label: string; priority
         className="object-cover transition duration-700 group-hover:scale-[1.035]"
       />
       <div className="absolute inset-0 bg-graphite/12" />
-      <div className="absolute inset-x-8 top-8 h-28 rounded-full border border-white/50 bg-white/10 blur-sm" />
-      <div className="absolute left-5 top-5 max-w-[calc(100%-2.5rem)] truncate rounded-full bg-white/86 px-4 py-2 text-xs font-medium uppercase tracking-[0.16em] text-graphite/60 backdrop-blur-md">
-        {label}
-      </div>
+      <div className="absolute inset-x-8 top-8 h-28 rounded-full border border-white/35 bg-white/10 blur-sm" />
+    </div>
+  );
+}
+
+function InlineImage({ label, priority = false, className = "aspect-[16/9]" }: { label: string; priority?: boolean; className?: string }) {
+  const source = imageMap[label] ?? fallbackImage;
+
+  return (
+    <div className={`group relative overflow-hidden rounded-[1.35rem] bg-mist shadow-soft ${className}`}>
+      <Image
+        src={source}
+        alt={label}
+        fill
+        priority={priority}
+        sizes="(min-width: 1024px) 40vw, 100vw"
+        className="object-cover transition duration-700 group-hover:scale-[1.035]"
+      />
+      <div className="absolute inset-0 bg-graphite/10" />
     </div>
   );
 }
@@ -348,8 +393,13 @@ export default function EscudoExpossomaPage() {
             title="Entender o expossoma é entender que a beleza também precisa de proteção diária."
             text="O expossoma descreve a totalidade das exposições às quais uma pessoa é submetida ao longo da vida. Em conjunto com a genética, influencia saúde, bem-estar, longevidade e também a aparência da pele e dos cabelos."
           />
-          <div className="grid gap-4 md:grid-cols-2">
-            {exposomeFactors.map((item, index) => <DataCard key={item.title} item={item} index={index} />)}
+          <div>
+            <Reveal className="mb-4">
+              <InlineImage label="IMG-CONCEITO-EXPOSSOMA" />
+            </Reveal>
+            <div className="grid gap-4 md:grid-cols-2">
+              {exposomeFactors.map((item, index) => <DataCard key={item.title} item={item} index={index} />)}
+            </div>
           </div>
         </div>
       </section>
@@ -407,7 +457,10 @@ export default function EscudoExpossomaPage() {
             title="Um sistema multifásico para proteção cosmética avançada."
             text="Bioésteres, extratos botânicos e ativos antioxidantes permitem combinar fitoquímicos de diferentes características, criando uma abordagem completa contra o estresse oxidativo e os sinais do envelhecimento ambiental."
           />
-          <div className="mt-12 grid gap-4 lg:grid-cols-3">
+          <Reveal className="mt-10">
+            <InlineImage label="IMG-FITOSINERGIA-MULTIFACES" className="aspect-[16/7]" />
+          </Reveal>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
             {phytoPillars.map((pillar, index) => {
               const Icon = pillar.icon;
               return (
@@ -447,6 +500,9 @@ export default function EscudoExpossomaPage() {
                     <div className="mt-8 grid gap-3 md:grid-cols-2">
                       {product.benefits.map((benefit) => <div key={benefit} className="rounded-[1.25rem] bg-porcelain p-4 text-sm leading-6 text-graphite/66">{benefit}</div>)}
                     </div>
+                    <div className="mt-6">
+                      <InlineImage label={product.supportImageLabel} className="aspect-[16/8]" />
+                    </div>
                     <p className="mt-6 rounded-[1.25rem] border border-graphite/10 p-5 text-sm leading-7 text-graphite/62"><strong className="text-graphite">Indicação:</strong> {product.indication}</p>
                   </div>
                 </div>
@@ -476,12 +532,16 @@ export default function EscudoExpossomaPage() {
           title="Um complexo botânico para proteger a fibra capilar."
           text="Ativos botânicos, agentes de revestimento e sistemas de penteabilidade ajudam a preservar a cutícula, reduzir o estresse oxidativo e melhorar a aparência de força, brilho e maleabilidade dos fios."
         />
-        <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Reveal className="mt-10">
+          <InlineImage label="IMG-TECNOLOGIA-ESCUDO-CAPILAR" className="aspect-[16/7]" />
+        </Reveal>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {hairActives.map((active, index) => {
             const Icon = active.icon;
             return (
               <Reveal key={active.title} delay={index * 0.04} className="rounded-[1.75rem] border border-graphite/10 bg-white p-6 shadow-soft">
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-porcelain text-graphite"><Icon className="h-5 w-5" /></span>
+                <InlineImage label={active.imageLabel} className="aspect-[4/3]" />
+                <span className="mt-6 grid h-12 w-12 place-items-center rounded-full bg-porcelain text-graphite"><Icon className="h-5 w-5" /></span>
                 <p className="eyebrow mt-8">{active.subtitle}</p>
                 <h2 className="mt-3 text-2xl font-light text-graphite">{active.title}</h2>
                 <p className="mt-4 text-sm leading-7 text-graphite/62">{active.text}</p>
