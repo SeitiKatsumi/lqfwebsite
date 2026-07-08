@@ -61,12 +61,36 @@ export const navItems: NavItem[] = [
         href: "/produtos#capilar",
         label: "Capilar",
         children: [
-          { href: "/produtos/capilar/linha-capilar-coreana", label: "Linha Capilar Coreana" }
+          { href: "/produtos/capilar/linha-capilar-coreana", label: "Linha Capilar Coreana" },
+          { href: "/produtos/capilar/cuidados-especiais", label: "Cuidados Especiais" },
+          { href: "/produtos/capilar/linha-capilar-frutada", label: "Linha Capilar Frutada" },
+          { href: "/produtos/capilar/recuperacao-tecnologica", label: "Capilar Recuperação Tecnológica" },
+          { href: "/produtos/capilar/variada", label: "Capilar Variada" },
+          { href: "/produtos/capilar/mascaras-capilares", label: "Máscaras Capilares" },
+          { href: "/produtos/capilar/oleos-capilares", label: "Óleos Capilares" },
+          { href: "/produtos/capilar/perfumes-capilares", label: "Perfumes Capilares" },
+          { href: "/produtos/capilar/tonicos-capilares", label: "Tônicos Capilares" }
         ]
       },
       { href: "/produtos#maos-e-pes", label: "Mãos e pés" },
-      { href: "/produtos#unhas", label: "Unhas" },
-      { href: "/produtos#bebe-e-infantil", label: "Bebê e Infantil" },
+      {
+        href: "/produtos#unhas",
+        label: "Unhas",
+        children: [
+          { href: "/produtos/unhas/cuidados-unhas-cuticulas", label: "Cuidados para Unhas e Cutículas" },
+          { href: "/produtos/unhas/bases-unhas", label: "Bases para Unhas" }
+        ]
+      },
+      {
+        href: "/produtos#bebe-e-infantil",
+        label: "Bebê e Infantil",
+        children: [{ href: "/produtos/bebe-e-infantil/essencial-infantil", label: "Essencial Infantil" }]
+      },
+      {
+        href: "/produtos#bucal",
+        label: "Bucal",
+        children: [{ href: "/produtos/bucal/enxaguantes-bucais", label: "Enxaguantes Bucais" }]
+      },
       { href: "/produtos#linha-materna", label: "Linha Materna" }
     ]
   },
@@ -114,6 +138,7 @@ export const lineImages = {
   maosEPes: "/lines/maos-e-pes.png",
   unhas: "/lines/unhas.png",
   bebeInfantil: "/lines/bebe-infantil.png",
+  bucal: "/lines/facial.png",
   materna: "/lines/materna.png"
 };
 
@@ -187,6 +212,12 @@ export const productCategories = [
     title: "Bebê e Infantil",
     text: "Cuidado da pele e cabelos de bebês e crianças, com suavidade, segurança e sensorialidade.",
     image: lineImages.bebeInfantil
+  },
+  {
+    slug: "bucal",
+    title: "Linha Bucal",
+    text: "Enxaguantes e produtos de higiene complementar com foco em frescor, rotina e comunicação regulatória segura.",
+    image: lineImages.bucal
   },
   {
     slug: "linha-materna",
@@ -285,7 +316,7 @@ export const pageMeta = {
       "Estrutura produtiva, ambientes controlados, purificação de água, controle de qualidade e rastreabilidade para fabricação de cosméticos e dermocosméticos."
   },
   produtos: {
-    title: "Produtos e Categorias | LQF Farmacêutica",
+    title: "Inovações e Categorias | LQF Farmacêutica",
     description:
       "Desenvolvimento e fabricação de linhas capilares, faciais, corporais, infantis, maternas, unhas, mãos e pés e produtos sob demanda."
   },
@@ -373,6 +404,66 @@ export const pageMeta = {
     title: "Linha Capilar Coreana — Skinificação | Haircare K-beauty LQF Farmacêutica",
     description:
       "Linha capilar premium inspirada na K-beauty e na skinificação capilar, com máscara intensiva, kit de hidratação em 3 passos e protocolo de reconstrução em 4 passos."
+  },
+  capilarCuidadosEspeciais: {
+    title: "Cuidados Especiais Capilares | Linha Capilar Performance 360 LQF Farmacêutica",
+    description:
+      "Plataforma capilar de alta performance para couro cabeludo, queda cosmética, detox, caspa, reconstrução, proteção térmica, lamelares, acidificação e cronograma capilar."
+  },
+  linhaCapilarFrutada: {
+    title: "Linha Capilar Frutada | Frutas Brasileiras e Biotecnologia Capilar",
+    description:
+      "Linha capilar frutada com ativos de frutas brasileiras, biotecnologia vegetal e propostas para brilho, hidratação, proteção, nutrição e força cosmética."
+  },
+  capilarRecuperacaoTecnologica: {
+    title: "Linha Capilar Recuperação Tecnológica | Nutrioil, Reparação Molecular e Gloss",
+    description:
+      "Linha capilar tecnológica com Nutrioil, Reparação Molecular, Anti Aging, Microbiota Capilar e Antiporosidade com Gloss Intenso para cabelos danificados, porosos e sensibilizados."
+  },
+  capilarVariada: {
+    title: "Capilar Variada | Linha Capilar Resultados Imediatos",
+    description:
+      "Plataforma capilar completa com linhas para hidratação, nutrição, restauração, cachos, loiros, detox, lisos, densidade, proteção de cor e anti-quebra."
+  },
+  mascarasCapilares: {
+    title: "Máscaras Capilares de Alta Performance | Hidratação, Reconstrução e Antiporosidade",
+    description:
+      "Coleção de máscaras capilares com Desmaia Total, Ultra Hidratação, Ultra Reconstrutora, Teia de Colágeno, Antiporosidade, Engrossa Fios e Bomba de Vitaminas."
+  },
+  oleosCapilares: {
+    title: "Óleos Finalizadores | Brilho, Anti-Frizz, Proteção Térmica e Reparação de Pontas",
+    description:
+      "Linha de óleos finalizadores para nutrição, controle de frizz, reparação visual de pontas, brilho intenso, proteção térmica e solar e óleo extraordinário multifuncional."
+  },
+  perfumesCapilares: {
+    title: "Perfumes Capilares | Fragrância, Brilho e Sensorial Premium",
+    description:
+      "Linha de perfumes capilares com perfumação sofisticada, toque leve, brilho, frescor e narrativa sensorial para haircare premium."
+  },
+  tonicosCapilares: {
+    title: "Tônicos Capilares | Couro Cabeludo, Raiz e Densidade Visual",
+    description:
+      "Linha de tônicos capilares com propostas para couro cabeludo, raiz, frescor, densidade visual, equilíbrio e cuidado cosmético seguro."
+  },
+  essencialInfantil: {
+    title: "Essencial Infantil | Linha Infantil Low Poo",
+    description:
+      "Linha infantil com shampoo suave, condicionador, creme para pentear, leave-in, spray desembaraçante e banho infantil com linguagem segura e foco em suavidade."
+  },
+  enxaguantesBucais: {
+    title: "Enxaguantes Bucais | Linha Bucal LQF Farmacêutica",
+    description:
+      "Linha de enxaguantes bucais infantis e adultos com opções sem álcool, frescor, conforto, sabores e comunicação regulatória segura."
+  },
+  cuidadosUnhasCuticulas: {
+    title: "Cuidados para Unhas e Cutículas | Nail Care LQF Farmacêutica",
+    description:
+      "Linha completa para higienizar, amolecer, nutrir, proteger, fortalecer e apoiar o cuidado de unhas e cutículas em protocolos profissionais e home care."
+  },
+  basesUnhas: {
+    title: "Bases para Unhas | Tratamento, Proteção e Esmaltação",
+    description:
+      "Linha de bases para unhas com propostas endurecedora, hidratante, nutritiva, antioxidante, camuflagem, reestruturadora e multibenefício."
   },
   processo: {
     title: "Processo LQF | Da ideia ao produto pronto para o mercado",

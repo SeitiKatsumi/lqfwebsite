@@ -32,6 +32,18 @@ export type TechnicalLandingConfig = {
   primaryCta: string;
   secondaryCta: string;
   anchors: Array<[string, string]>;
+  labels?: {
+    architectureEyebrow?: string;
+    summaryEyebrow?: string;
+    summaryTitle?: string;
+    summaryText?: string;
+    indicationEyebrow?: string;
+    indicationTitle?: string;
+    indicationText?: string;
+    claimsEyebrow?: string;
+    claimsTitle?: string;
+    claimsText?: string;
+  };
   concept: {
     imageLabel: string;
     title: string;
@@ -77,6 +89,8 @@ export type TechnicalLandingConfig = {
     secondary: string;
   };
   faq: Array<[string, string]>;
+  backHref?: string;
+  backLabel?: string;
   flags: {
     showInternalLotCodes: boolean;
     showRegulatoryNotes: boolean;
@@ -85,6 +99,7 @@ export type TechnicalLandingConfig = {
     showKitSuggestions: boolean;
     showIngredientDetails?: boolean;
     showProtocolSteps?: boolean;
+    showClinicalClaims?: boolean;
   };
 };
 
@@ -170,6 +185,20 @@ function DataTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
 }
 
 export function TechnicalRoutineLanding({ config }: { config: TechnicalLandingConfig }) {
+  const labels = {
+    architectureEyebrow: "Arquitetura da rotina",
+    summaryEyebrow: "Rotina resumida",
+    summaryTitle: "Rotina completa em etapas claras.",
+    summaryText: "Um quadro simples para treinamento, navegação consultiva e apresentação comercial.",
+    indicationEyebrow: "Indicação por necessidade",
+    indicationTitle: "Escolha pelo que a pele precisa agora.",
+    indicationText: "A arquitetura ajuda a orientar kits, rotinas e recomendação por perfil de uso.",
+    claimsEyebrow: "Claims e segurança regulatória",
+    claimsTitle: "Comunicação técnica, segura e defensável.",
+    claimsText: "A copy pública deve evitar promessas absolutas e manter claims sensíveis sujeitos à comprovação por testes adequados.",
+    ...config.labels
+  };
+
   return (
     <main className="bg-[#fbfaf7] text-stone-800">
       <section className="mx-auto grid min-h-screen max-w-[1500px] items-center gap-12 px-6 pb-24 pt-32 lg:grid-cols-[0.95fr_1.05fr] lg:px-10">
@@ -207,7 +236,7 @@ export function TechnicalRoutineLanding({ config }: { config: TechnicalLandingCo
 
       <section id="rotina" className="mx-auto grid max-w-[1500px] gap-10 px-6 py-24 lg:grid-cols-[0.95fr_1.05fr] lg:px-10">
         <div>
-          <SectionTitle eyebrow="Arquitetura da rotina" title={config.architecture.title} text={config.architecture.text} />
+          <SectionTitle eyebrow={labels.architectureEyebrow} title={config.architecture.title} text={config.architecture.text} />
           <div className="mt-10 grid gap-4">
             {config.architecture.groups.map((group) => (
               <div key={group.title} className="rounded-[26px] border border-stone-200 bg-white p-6">
@@ -230,13 +259,13 @@ export function TechnicalRoutineLanding({ config }: { config: TechnicalLandingCo
       ))}
 
       <section id="resumo" className="mx-auto max-w-[1500px] px-6 py-24 lg:px-10">
-        <SectionTitle eyebrow="Rotina resumida" title="Rotina completa em etapas claras." text="Um quadro simples para treinamento, navegação consultiva e apresentação comercial." />
+        <SectionTitle eyebrow={labels.summaryEyebrow} title={labels.summaryTitle} text={labels.summaryText} />
         <div className="mt-10"><DataTable headers={["Momento", "Passo", "Produto", "Função"]} rows={config.summaryRows.map((row) => [...row])} /></div>
         <div className="mt-12"><ImagePanel image={config.image} label={config.summaryImageLabel} /></div>
       </section>
 
       <section id="indicacao" className="mx-auto max-w-[1500px] px-6 py-24 lg:px-10">
-        <SectionTitle eyebrow="Indicação por necessidade" title="Escolha pelo que a pele precisa agora." text="A arquitetura ajuda a orientar kits, rotinas e recomendação por perfil de uso." />
+        <SectionTitle eyebrow={labels.indicationEyebrow} title={labels.indicationTitle} text={labels.indicationText} />
         <div className="mt-10"><DataTable headers={["Necessidade", "Produto indicado", "Benefício percebido"]} rows={config.indicationRows.map((row) => [...row])} /></div>
         <div className="mt-12"><ImagePanel image={config.image} label={config.indicationImageLabel} /></div>
       </section>
@@ -264,7 +293,7 @@ export function TechnicalRoutineLanding({ config }: { config: TechnicalLandingCo
 
       {config.flags.showRegulatoryNotes ? (
         <section id="claims" className="mx-auto max-w-[1500px] px-6 py-24 lg:px-10">
-          <SectionTitle eyebrow="Claims e segurança regulatória" title="Comunicação técnica, segura e defensável." text="A copy pública deve evitar promessas absolutas e manter claims sensíveis sujeitos à comprovação por testes adequados." />
+          <SectionTitle eyebrow={labels.claimsEyebrow} title={labels.claimsTitle} text={labels.claimsText} />
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
             <IconCard title="Claims seguros" text={config.claims.safe.join(" • ")} icon={BadgeCheck} />
             <IconCard title="Exigem comprovação" text={config.claims.proof.join(" • ")} icon={AlertTriangle} />
@@ -292,8 +321,8 @@ export function TechnicalRoutineLanding({ config }: { config: TechnicalLandingCo
       </section>
 
       <section className="mx-auto max-w-[1500px] px-6 pb-28 lg:px-10">
-        <a href="/produtos#facial" className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-5 py-3 text-sm text-stone-600 transition hover:bg-stone-900 hover:text-white">
-          Voltar para linhas faciais <ArrowRight className="h-4 w-4" />
+        <a href={config.backHref ?? "/produtos#facial"} className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-5 py-3 text-sm text-stone-600 transition hover:bg-stone-900 hover:text-white">
+          {config.backLabel ?? "Voltar para linhas faciais"} <ArrowRight className="h-4 w-4" />
         </a>
       </section>
     </main>
