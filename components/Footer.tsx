@@ -41,13 +41,15 @@ export function Footer() {
           </p>
           <p className="flex gap-3">
             <Phone className="mt-0.5 h-4 w-4 shrink-0" />
-            <a href="tel:+551732093010" className="transition hover:text-graphite">
-              17 3209-3010
+            <a href="https://wa.me/5517991151770" target="_blank" rel="noreferrer" className="transition hover:text-graphite">
+              (17) 99115-1770
             </a>
           </p>
           <p className="flex gap-3">
             <Mail className="mt-0.5 h-4 w-4 shrink-0" />
-            contato@lqf.com.br
+            <a href="mailto:comercial@lqf.com.br" className="transition hover:text-graphite">
+              comercial@lqf.com.br
+            </a>
           </p>
           <div className="flex items-center gap-3 pt-2">
             <a

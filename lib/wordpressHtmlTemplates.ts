@@ -87,8 +87,8 @@ export function wordpressFooterHtml() {
     </nav>
     <div class="lqf-wp-footer-contact">
       <p>Avenida Floriano Andre Cabrera, 1361<br>Cidade Jardim | CEP: 15.081-190<br>Sao Jose do Rio Preto - SP</p>
-      <p><a href="tel:+551732093010">17 3209-3010</a></p>
-      <p>contato@lqf.com.br</p>
+      <p><a href="https://wa.me/5517991151770">(17) 99115-1770</a></p>
+      <p><a href="mailto:comercial@lqf.com.br">comercial@lqf.com.br</a></p>
       <p><a href="https://www.facebook.com/GrupoLQF/">Facebook</a> &nbsp; <a href="https://www.instagram.com/lqflaboratorio/">Instagram</a></p>
     </div>
   </div>

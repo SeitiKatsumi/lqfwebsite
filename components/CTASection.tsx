@@ -14,7 +14,7 @@ export function CTASection() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <MinimalButton href="/contato" variant="light">Solicitar contato</MinimalButton>
-              <MinimalButton href="https://wa.me/5500000000000" variant="darkGhost">Falar pelo WhatsApp</MinimalButton>
+              <MinimalButton href="https://wa.me/5517991151770" variant="darkGhost">Falar pelo WhatsApp</MinimalButton>
             </div>
           </div>
         </div>

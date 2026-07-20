@@ -95,7 +95,8 @@ Informações comerciais:
 
 Contato:
 - Avenida Floriano Andre Cabrera, 1361, Cidade Jardim, CEP 15.081-190, São José do Rio Preto - SP.
-- Telefone: 17 3209-3010.
+- WhatsApp: (17) 99115-1770.
+- E-mail: comercial@lqf.com.br.
 - Facebook: facebook.com/GrupoLQF
 - Instagram: instagram.com/lqflaboratorio
 `.trim();
