@@ -10,12 +10,12 @@ import { chemicalImages, conceptImages, pageMeta, technologyItems } from "@/lib/
 export const metadata: Metadata = pageMeta.tecnologia;
 
 const technologyImages = [
-  conceptImages.technology,
-  conceptImages.editorialB,
-  conceptImages.quality,
-  conceptImages.packaging,
-  conceptImages.about,
-  conceptImages.editorialA
+  "/technology/ambientes-controlados.webp",
+  "/technology/purificacao-agua.webp",
+  "/technology/controle-microbiologico.webp",
+  "/technology/laboratorios-fisico-quimicos.webp",
+  "/technology/producao-industrial.webp",
+  "/technology/estoques-climatizados.webp"
 ];
 
 export default function TecnologiaPage() {
