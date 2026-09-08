@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": true,
+    "layout": {"contentSize": "1464px", "wideSize": "1560px"},
+    "color": {"defaultPalette": false, "palette": [{"slug":"graphite","name":"Grafite","color":"#3f3f3b"},{"slug":"porcelain","name":"Porcelana","color":"#f7f6f3"},{"slug":"white","name":"Branco","color":"#ffffff"}]},
+    "typography": {"fontFamilies":[{"slug":"inter","name":"Inter","fontFamily":"Inter, sans-serif","fontFace":[{"fontFamily":"Inter","fontStyle":"normal","fontWeight":"100 900","src":["file:./assets/inter-latin.woff2"]}]}]}
+  },
+  "styles": {"color":{"background":"#f7f6f3","text":"#3f3f3b"},"typography":{"fontFamily":"var:preset|font-family|inter","fontWeight":"300","lineHeight":"1.75"},"spacing":{"blockGap":"0"},"elements":{"link":{"color":{"text":"inherit"},"typography":{"textDecoration":"none"}}}},
+  "customTemplates": [{"name":"processo-seo","title":"LQF — Processo SEO","postTypes":["post"]}],
+  "templateParts": [{"name":"header","title":"Cabeçalho LQF","area":"header"},{"name":"footer","title":"Rodapé LQF","area":"footer"},{"name":"process","title":"Seis etapas do processo","area":"uncategorized"},{"name":"cta","title":"Próximo projeto","area":"uncategorized"}]
+}

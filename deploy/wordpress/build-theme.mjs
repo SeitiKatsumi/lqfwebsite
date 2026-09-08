@@ -1,0 +1,55 @@
+// Generate native blocks from the shared Next.js content. Run from repository root.
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+const root = path.resolve('deploy/wordpress/lqf');
+const source = fs.readFileSync('lib/site.ts', 'utf8');
+const readArray = name => vm.runInNewContext('(' + source.match(new RegExp(`export const ${name}[^=]*= (\\[[\\s\\S]*?\\n\\]);`))[1] + ')');
+const nav = readArray('navItems'), steps = readArray('processSteps');
+const domain = 'https://www.lqf.com.br', contact = domain + '/contato#formulario';
+const block = (name, attrs, html) => `<!-- wp:${name} ${JSON.stringify(attrs)} -->${html}<!-- /wp:${name} -->\n`;
+const dynamic = (name, attrs = {}) => `<!-- wp:${name} ${JSON.stringify(attrs)} /-->\n`;
+const group = (cls, content, tag = 'div') => block('group', {tagName:tag,className:cls,layout:{type:'default'}}, `<${tag} class="wp-block-group ${cls}">${content}</${tag}>`);
+const p = (text, cls = '') => block('paragraph', cls ? {className:cls} : {}, `<p${cls ? ` class="${cls}"` : ''}>${text}</p>`);
+const h = (text, level, cls = '') => block('heading', {level,...(cls ? {className:cls} : {})}, `<h${level} class="wp-block-heading${cls ? ' '+cls : ''}">${text}</h${level}>`);
+const button = (label, cls = '') => block('button', {className:cls}, `<div class="wp-block-button ${cls}"><a class="wp-block-button__link wp-element-button" href="${contact}">${label} <span aria-hidden="true">↗</span></a></div>`);
+const buttons = content => block('buttons', {}, `<div class="wp-block-buttons">${content}</div>`);
+const img = (file, cls, alt) => block('image', {sizeSlug:'full',className:cls}, `<figure class="wp-block-image size-full ${cls}"><img src="<?php echo esc_url(get_theme_file_uri('assets/${file}')); ?>" alt="${alt}"/></figure>`);
+const part = (slug, tagName) => dynamic('template-part', {slug,...(tagName ? {tagName} : {})});
+function write(file, content) { fs.mkdirSync(path.dirname(path.join(root,file)),{recursive:true}); fs.writeFileSync(path.join(root,file),content); }
+function pattern(slug, title, content) { write('patterns/'+slug+'.php', `<?php\n/**\n * Title: ${title}\n * Slug: lqf/${slug}\n * Inserter: no\n */\n?>\n${content}`); }
+const patternRef = slug => dynamic('pattern',{slug:'lqf/'+slug});
+const navBlocks = items => items.map(item => item.children ? block('navigation-submenu',{label:item.label,url:domain+item.href,kind:'custom'},navBlocks(item.children)) : dynamic('navigation-link',{label:item.label,url:domain+item.href,kind:'custom'})).join('');
+const logo = (vertical = false) => block('html',{},`<a href="${domain}/" class="lqf-logo${vertical ? ' lqf-logo-vertical' : ''}" aria-label="LQF Farmacêutica — Início"><img src="<?php echo esc_url(get_theme_file_uri('assets/logo-${vertical ? 'vertical' : 'horizontal'}.webp')); ?>" alt="LQF Farmacêutica" width="1080" height="${vertical ? 610 : 155}"/></a>`);
+pattern('header','Cabeçalho LQF',group('lqf-header',group('lqf-nav-shell',logo() + block('navigation',{overlayMenu:'mobile',className:'lqf-navigation',layout:{type:'flex',justifyContent:'center'},ariaLabel:'Menu principal'},navBlocks(nav)) + buttons(button('Desenvolva sua linha','lqf-nav-cta')))));
+const hero = level => group('lqf-hero',group('lqf-shell lqf-hero-grid',group('lqf-hero-copy',p('Processo LQF','lqf-eyebrow') + h('Da ideia ao produto pronto para o mercado.',level,'lqf-display') + p('Um processo estruturado para transformar conceitos em produtos cosméticos e dermocosméticos reais, seguros e competitivos.','lqf-body-large') + buttons(button('Desenvolva sua linha'))) + img('processo.webp','lqf-hero-image','')),'section');
+pattern('hero-home','Processo — abertura da home',hero(1));
+pattern('hero-post','Processo — abertura dos posts',hero(2));
+const timeline = group('lqf-steps',steps.map((step,i) => group('lqf-step',p(String(i+1).padStart(2,'0'),'lqf-step-number') + group('lqf-step-copy',h(step.title,3)+p(step.text)))).join(''));
+pattern('process','Processo — seis etapas',group('lqf-shell lqf-process',group('lqf-process-intro',p('Macroetapas','lqf-eyebrow') + h('Uma jornada técnica, clara e acompanhada.',2,'lqf-section-title') + p('Da reunião inicial à liberação do produto acabado, cada etapa conecta estratégia, viabilidade, qualidade e documentação.','lqf-body-large')) + timeline,'section'));
+pattern('cta','Próximo projeto',group('lqf-shell lqf-cta-section',group('lqf-cta',p('Próximo projeto','lqf-eyebrow') + group('lqf-cta-grid',h('Pronto para transformar sua ideia em produto?',2,'lqf-cta-title') + group('lqf-cta-copy',p('Fale com a LQF Farmacêutica e descubra como desenvolver sua linha de cosméticos ou dermocosméticos com estrutura técnica, qualidade e segurança.') + buttons(button('Solicitar contato','lqf-button-light') + button('Falar pelo WhatsApp','lqf-button-outline'))))),'section'));
+const footNav = nav.map(item=>`<a href="${domain+item.href}">${item.label}</a>`).join('') + `<a href="${domain}/politica-de-privacidade">Política de Privacidade</a>`;
+const icon = paths => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+const pin = icon('<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>');
+const phone = icon('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>');
+const mail = icon('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-9 6a2 2 0 0 1-2 0L2 7"/>');
+const fb = icon('<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>');
+const insta = icon('<rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>');
+pattern('footer','Rodapé LQF',group('lqf-footer',group('lqf-shell lqf-footer-grid',group('lqf-footer-brand',logo(true)+p('A ciência por trás da beleza.')) + block('html',{},`<nav class="lqf-footer-nav" aria-label="Rodapé">${footNav}</nav>`) + group('lqf-footer-contact',p('Avenida Floriano Andre Cabrera, 1361<br>Cidade Jardim | CEP: 15.081-190<br>São José do Rio Preto - SP') + p('<a href="https://wa.me/5517991151770">(17) 99115-1770</a>') + p('<a href="mailto:comercial@lqf.com.br">comercial@lqf.com.br</a>') + p('<a href="https://www.facebook.com/GrupoLQF/" aria-label="Facebook LQF">Facebook</a>　<a href="https://www.instagram.com/lqflaboratorio/" aria-label="Instagram LQF">Instagram</a>'))) + group('lqf-shell lqf-footer-bottom',p('© <?php echo esc_html(wp_date("Y")); ?> LQF Farmacêutica. Todos os direitos reservados.') + p('<a href="https://elevenmind.com.br/">Desenvolvido por Elevenmind</a>　<a href="'+domain+'/politica-de-privacidade">Política de Privacidade</a>'))));
+for (const slug of ['header','footer','process','cta']) write('parts/'+slug+'.html',patternRef(slug));
+// Static contact details use HTML so SVGs remain editable without a block extension.
+const footerFile=path.join(root,'patterns/footer.php');
+let footer=fs.readFileSync(footerFile,'utf8');
+const start=footer.indexOf('<!-- wp:group {"tagName":"div","className":"lqf-footer-contact"');
+const end=footer.indexOf('</div><!-- /wp:group -->',start)+'</div><!-- /wp:group -->'.length;
+footer=footer.slice(0,start)+block('html',{},`<div class="lqf-footer-contact"><p>${pin}<span>Avenida Floriano Andre Cabrera, 1361<br>Cidade Jardim | CEP: 15.081-190<br>São José do Rio Preto - SP</span></p><p>${phone}<a href="https://wa.me/5517991151770">(17) 99115-1770</a></p><p>${mail}<a href="mailto:comercial@lqf.com.br">comercial@lqf.com.br</a></p><div class="lqf-social"><a href="https://www.facebook.com/GrupoLQF/" aria-label="Facebook LQF">${fb}</a><a href="https://www.instagram.com/lqflaboratorio/" aria-label="Instagram LQF">${insta}</a></div></div>`)+footer.slice(end);
+fs.writeFileSync(footerFile,footer);
+const article = group('lqf-shell lqf-article',dynamic('post-title',{level:1}) + dynamic('post-content'),'article');
+const shell = body => part('header','header') + group('lqf-main',body,'main') + part('footer','footer');
+write('templates/front-page.html',shell(patternRef('hero-home')+part('process')+part('cta')));
+write('templates/processo-seo.html',shell(patternRef('hero-post')+part('process')+article+part('cta')));
+write('templates/single.html',shell(group('lqf-standard',article)+part('cta')));
+write('templates/page.html',shell(group('lqf-standard',article)));
+write('templates/index.html',shell(group('lqf-shell lqf-standard',dynamic('query-title',{type:'archive',showPrefix:false}) + block('query',{query:{inherit:true}},'<div class="wp-block-query">'+block('post-template',{},group('lqf-list-post',dynamic('post-title',{isLink:true,level:2})+dynamic('post-excerpt')))+block('query-pagination',{},dynamic('query-pagination-previous')+dynamic('query-pagination-numbers')+dynamic('query-pagination-next'))+block('query-no-results',{},p('Nenhum conteúdo publicado nesta categoria ainda.'))+'</div>'))));
+write('templates/404.html',shell(group('lqf-shell lqf-standard',h('Página não encontrada',1)+p('<a href="'+domain+'/conteudo/">Voltar ao início</a>'))));
+console.log('LQF theme blocks generated.');
