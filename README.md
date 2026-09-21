@@ -38,17 +38,29 @@ Porta interna:
 80
 ```
 
-## Iris IA e Admin
+## Iris no Live Chat e Admin legado
 
-A assistente Iris registra leads, pipeline e histórico de conversa em SQLite. Configure estas variáveis no CapRover:
+O chat do site usa o canal web do Live Chat, que concentra a IA, os atendentes e o histórico. Configure no CapRover (valores por implantação):
 
 ```text
-OPENAI_API_KEY=...
+LIVECHAT_BASE_URL=https://live.elevenmind.com.br
+LIVECHAT_TENANT_SLUG=lqf
+```
+
+As rotas `/api/iris` e `/api/iris/start` são proxies same-origin. Não precisam de chave OpenAI nem token administrativo. A sessão usa UUID aleatório no cabeçalho `X-Visitor-Id` e localStorage separado por servidor/workspace; não reutiliza o identificador do chat antigo. Nome, e-mail e WhatsApp são registrados em uma mensagem inicial do visitante. Reabrir o chat recupera o histórico sem reenviar os dados. Notas privadas não são encaminhadas ao navegador.
+
+Validação local: `node lib/liveChat.test.mjs` e `pnpm build`. O limite de envio é 30 requisições/minuto/IP por processo; múltiplas réplicas exigem limite compartilhado.
+
+Preserve `/data`, as variáveis existentes e o Nginx que encaminha `/conteudo/` ao WordPress. O painel `/admin` e seu SQLite mantêm os registros antigos e os formulários; novos atendimentos do chat são acompanhados no Live Chat.
+
+Configuração do painel legado no CapRover:
+
+```text
 ADMIN_PASSWORD=...
 SQLITE_PATH=/data/lqf-leads.sqlite
 ```
 
-`OPENAI_MODEL` é opcional. Sem uma chave OpenAI configurada no painel ou em `OPENAI_API_KEY`, a Iris registra a conversa e aguarda resposta humana. O painel de gestão fica em `/admin` e exige a chave `ADMIN_PASSWORD`.
+O painel de gestão fica em `/admin` e exige a chave `ADMIN_PASSWORD`. Configurações de IA antigas desse painel não controlam o chat web integrado.
 
 Para preservar chave da Iris, leads, formulários e histórico de conversa em produção, configure um diretório persistente no CapRover:
 
