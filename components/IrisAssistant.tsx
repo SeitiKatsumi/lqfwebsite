@@ -29,6 +29,7 @@ export function IrisAssistant() {
   const [open, setOpen] = useState(false);
   const [identity, setIdentity] = useState<LeadIdentity | null>(null);
   const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -110,7 +111,7 @@ export function IrisAssistant() {
       const response = await fetch("/api/iris/start", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Visitor-Id": visitorId },
-        body: JSON.stringify({ name, email, whatsapp })
+        body: JSON.stringify({ name, company, email, whatsapp })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Não foi possível iniciar o atendimento.");
@@ -121,7 +122,7 @@ export function IrisAssistant() {
         setError("O navegador não permite salvar a sessão. Mantenha esta página aberta para continuar.");
       }
       setIdentity(nextIdentity);
-      const introduction = `Nome: ${name.trim()}\nE-mail: ${email.trim()}\nWhatsApp: ${whatsapp.trim()}\nGostaria de iniciar um atendimento.`;
+      const introduction = `Nome: ${name.trim()}\nEmpresa: ${company.trim()}\nE-mail: ${email.trim()}\nWhatsApp: ${whatsapp.trim()}\nGostaria de iniciar um atendimento.`;
       const sent = await fetch("/api/iris", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Visitor-Id": visitorId },
@@ -222,7 +223,7 @@ export function IrisAssistant() {
             </header>
 
             {!identity ? (
-              <form onSubmit={startLead} className="flex flex-1 flex-col justify-between bg-[linear-gradient(180deg,#fff,#f8f7f4)] p-5">
+              <form onSubmit={startLead} className="flex min-h-0 flex-1 flex-col justify-between overflow-y-auto bg-[linear-gradient(180deg,#fff,#f8f7f4)] p-5">
                 <div>
                   <p className="eyebrow">Atendimento IA</p>
                   <h2 className="mt-4 text-3xl font-light leading-tight text-graphite">Antes de começar, preciso dos seus dados.</h2>
@@ -237,6 +238,16 @@ export function IrisAssistant() {
                       placeholder="Nome"
                       aria-label="Nome"
                       maxLength={120}
+                      className="h-12 rounded-2xl border border-graphite/10 bg-white px-4 text-sm outline-none focus:border-stone"
+                    />
+                    <input
+                      value={company}
+                      onChange={(event) => setCompany(event.target.value)}
+                      required
+                      placeholder="Nome da empresa"
+                      aria-label="Nome da empresa"
+                      autoComplete="organization"
+                      maxLength={160}
                       className="h-12 rounded-2xl border border-graphite/10 bg-white px-4 text-sm outline-none focus:border-stone"
                     />
                     <input
@@ -265,7 +276,7 @@ export function IrisAssistant() {
                 <button
                   type="submit"
                   disabled={loading || !storageKey}
-                  className="mt-6 flex h-12 items-center justify-center gap-2 rounded-full bg-graphite px-5 text-sm font-medium text-white transition hover:bg-graphite/92 disabled:opacity-55"
+                  className="mt-6 flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-graphite px-5 text-sm font-medium text-white transition hover:bg-graphite/92 disabled:opacity-55"
                 >
                   {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                   Iniciar atendimento
