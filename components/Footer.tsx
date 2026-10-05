@@ -41,8 +41,8 @@ export function Footer() {
           </p>
           <p className="flex gap-3">
             <Phone className="mt-0.5 h-4 w-4 shrink-0" />
-            <a href="https://wa.me/5517991151770" target="_blank" rel="noreferrer" className="transition hover:text-graphite">
-              (17) 99115-1770
+            <a href="https://wa.me/5517991185880" target="_blank" rel="noreferrer" className="transition hover:text-graphite">
+              (17) 99118-5880
             </a>
           </p>
           <p className="flex gap-3">
